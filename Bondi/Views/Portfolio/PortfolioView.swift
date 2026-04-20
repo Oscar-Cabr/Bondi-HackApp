@@ -1,6 +1,9 @@
+import ClerkKit
+import ClerkKitUI
 import SwiftUI
 
 struct PortfolioView: View {
+    @Environment(Clerk.self) private var clerk
     private let investments = MockData.investments
 
     private var totalInvested: Double { investments.reduce(0) { $0 + $1.amountUSD } }
@@ -8,13 +11,20 @@ struct PortfolioView: View {
     private var totalReturn: Double { totalCurrent - totalInvested }
     private var totalReturnPercent: Double { totalInvested > 0 ? totalReturn / totalInvested * 100 : 0 }
 
+    private var greeting: String {
+        if let first = clerk.user?.firstName, !first.isEmpty {
+            return "Hola, \(first)"
+        }
+        return "Valor total"
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
                     // Balance card
                     VStack(spacing: 8) {
-                        Text("Valor total")
+                        Text(greeting)
                             .font(.subheadline)
                             .foregroundStyle(.white.opacity(0.8))
                         Text("$\(totalCurrent, specifier: "%.2f")")
@@ -64,6 +74,12 @@ struct PortfolioView: View {
                 .padding(.vertical)
             }
             .navigationTitle("Mi Portafolio")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    UserButton()
+                        .environment(\.clerkTheme, .bondi)
+                }
+            }
         }
     }
 }

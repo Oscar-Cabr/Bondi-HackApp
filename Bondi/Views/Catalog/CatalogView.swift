@@ -1,3 +1,4 @@
+import ClerkKitUI
 import SwiftUI
 
 struct CatalogView: View {
@@ -79,6 +80,12 @@ struct CatalogView: View {
             .navigationTitle("Bondi")
             .navigationBarTitleDisplayMode(.large)
             .searchable(text: $searchText, prompt: "Buscar bonos")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    UserButton()
+                        .environment(\.clerkTheme, .bondi)
+                }
+            }
         }
     }
 }
