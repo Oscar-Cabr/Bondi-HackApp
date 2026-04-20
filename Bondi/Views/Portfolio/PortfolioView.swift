@@ -7,12 +7,14 @@ struct PortfolioView: View {
     @Environment(Clerk.self) private var clerk
     @Query(sort: \InvestmentRecord.investedAt, order: .reverse)
     private var investments: [InvestmentRecord]
+    @AppStorage("cashBalanceUSD") private var cashBalanceUSD: Double = 500
     @State private var showAnalysis = false
 
     private var totalInvested: Double { investments.reduce(0) { $0 + $1.amountUSD } }
     private var totalCurrent: Double { investments.reduce(0) { $0 + $1.currentValueUSD } }
     private var totalReturn: Double { totalCurrent - totalInvested }
     private var totalReturnPercent: Double { totalInvested > 0 ? totalReturn / totalInvested * 100 : 0 }
+    private var totalEquity: Double { totalCurrent + cashBalanceUSD }
 
     private var upcomingMaturities: [InvestmentRecord] {
         investments
@@ -63,7 +65,10 @@ struct PortfolioView: View {
                 }
             }
             .sheet(isPresented: $showAnalysis) {
-                PortfolioAnalysisView(investments: investments)
+                PortfolioAnalysisView(
+                    investments: investments,
+                    cashBalanceUSD: cashBalanceUSD
+                )
             }
         }
     }
@@ -112,11 +117,11 @@ struct PortfolioView: View {
 
     private var balanceCard: some View {
         VStack(spacing: 8) {
-            Text("Valor total")
+            Text("Patrimonio total")
                 .font(.subheadline)
                 .foregroundStyle(.white.opacity(0.8))
 
-            Text(totalCurrent, format: .currency(code: "USD"))
+            Text(totalEquity, format: .currency(code: "USD"))
                 .font(.system(size: 44, weight: .bold))
                 .foregroundStyle(.white)
 
@@ -127,6 +132,30 @@ struct PortfolioView: View {
             }
             .font(.subheadline)
             .foregroundStyle(totalReturn >= 0 ? Color.bondiGreen : Color.bondiRed)
+
+            Divider()
+                .overlay(Color.white.opacity(0.15))
+                .padding(.vertical, 4)
+
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("En bonos")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.7))
+                    Text(totalCurrent, format: .currency(code: "USD"))
+                        .font(.subheadline.bold())
+                        .foregroundStyle(.white)
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("Disponible")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.7))
+                    Text(cashBalanceUSD, format: .currency(code: "USD"))
+                        .font(.subheadline.bold())
+                        .foregroundStyle(.white)
+                }
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(24)

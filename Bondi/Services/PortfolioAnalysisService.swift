@@ -23,6 +23,7 @@ final class PortfolioAnalysisService {
     var inputText = ""
 
     private var investmentsSnapshot: [InvestmentRecord] = []
+    private var cashBalanceUSD: Double = 0
     private var fallbackRotation = 0
 
     // Stored as Any? because LanguageModelSession is iOS 26+ only.
@@ -45,22 +46,20 @@ final class PortfolioAnalysisService {
 
     // MARK: Start
 
-    func start(investments: [InvestmentRecord]) async {
+    /// Opens the chat with a deterministic, structured breakdown of the user's
+    /// portfolio. The AI session is still started so follow-up questions use it
+    /// when available.
+    func start(investments: [InvestmentRecord], cashBalanceUSD: Double) async {
         guard messages.isEmpty else { return }
         investmentsSnapshot = investments
+        self.cashBalanceUSD = cashBalanceUSD
 
-        guard Self.isAvailable else {
-            await appendAnimated(
-                "Apple Intelligence no está disponible en este dispositivo. " +
-                "Activalo en Ajustes → Apple Intelligence."
-            )
-            return
-        }
-
-        if #available(iOS 26.0, *) {
+        if Self.isAvailable, #available(iOS 26.0, *) {
             session = makeSession()
-            await sendPrompt(initialPrompt())
         }
+
+        // Always show the structured breakdown first — guaranteed, deterministic.
+        await appendAnimated(portfolioBreakdown())
     }
 
     // MARK: Send user message
@@ -69,13 +68,23 @@ final class PortfolioAnalysisService {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isLoading else { return }
         inputText = ""
-        messages.append(ChatMessage(role: .user, content: text))
+        await submit(text: text)
+    }
 
-        guard Self.isAvailable, #available(iOS 26.0, *) else {
-            await appendAnimated("Apple Intelligence no está disponible en este momento.")
-            return
+    /// Send an arbitrary user text (used by suggestion chips in the UI).
+    func submit(text: String) async {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !isLoading else { return }
+        messages.append(ChatMessage(role: .user, content: trimmed))
+
+        if Self.isAvailable, #available(iOS 26.0, *) {
+            await sendPrompt(trimmed)
+        } else {
+            // No AI → smart fallback that answers any input
+            let idx = appendStreamingPlaceholder()
+            isLoading = true
+            await animateContent(into: idx, text: dataBackedFallback(for: trimmed))
         }
-        await sendPrompt(text)
     }
 
     // MARK: Core streaming
@@ -172,6 +181,66 @@ final class PortfolioAnalysisService {
         print("╰───────────────────────────────────────────────")
     }
 
+    // MARK: Portfolio breakdown (shown on open — always deterministic)
+
+    private func portfolioBreakdown() -> String {
+        let invs = investmentsSnapshot
+        let totalInvested = invs.reduce(0) { $0 + $1.amountUSD }
+        let totalCurrent = invs.reduce(0) { $0 + $1.currentValueUSD }
+        let gain = totalCurrent - totalInvested
+        let gainPct = totalInvested > 0 ? (gain / totalInvested) * 100 : 0
+        let equity = totalCurrent + cashBalanceUSD
+
+        if invs.isEmpty && cashBalanceUSD <= 0 {
+            return """
+            ¡Hola! Tu cuenta todavía está vacía.
+
+            Cuando hagas tu primera inversión o agregues saldo, acá vas a ver un desglose completo de tu portafolio.
+            """
+        }
+
+        if invs.isEmpty {
+            return """
+            ¡Hola! Este es el estado de tu cuenta:
+
+            💵 Disponible para invertir: $\(fmt(cashBalanceUSD))
+
+            Todavía no tenés bonos. Cuando invierttas tu primer monto desde el Catálogo, acá vas a ver cómo se comporta cada bono.
+            """
+        }
+
+        let sign = gain >= 0 ? "+" : ""
+        var lines: [String] = []
+        lines.append("Este es el desglose de tu portafolio:")
+        lines.append("")
+        lines.append("📊 Patrimonio total: $\(fmt(equity))")
+        lines.append("  • En bonos: $\(fmt(totalCurrent))")
+        lines.append("  • Disponible: $\(fmt(cashBalanceUSD))")
+        lines.append("")
+        lines.append("📈 Rendimiento acumulado: \(sign)$\(fmt(gain)) (\(sign)\(String(format: "%.2f", gainPct))%)")
+        lines.append("")
+        lines.append("💼 Tus bonos:")
+        for inv in invs.sorted(by: { $0.amountUSD > $1.amountUSD }) {
+            let rSign = inv.returnUSD >= 0 ? "+" : ""
+            lines.append(
+                "• \(inv.bondCountryFlag) \(inv.bondName) — $\(fmt(inv.amountUSD)) " +
+                "al \(String(format: "%.1f", inv.bondYieldAnnual))% · vence en \(inv.monthsRemaining) " +
+                "mes\(inv.monthsRemaining == 1 ? "" : "es") · hoy $\(fmt(inv.currentValueUSD)) " +
+                "(\(rSign)$\(fmt(inv.returnUSD)))"
+            )
+        }
+        lines.append("")
+        if let next = invs.min(by: { $0.monthsRemaining < $1.monthsRemaining }) {
+            lines.append(
+                "⏱ Próximo vencimiento: \(next.bondName) en \(next.monthsRemaining) " +
+                "mes\(next.monthsRemaining == 1 ? "" : "es") — cobrás ~$\(fmt(next.expectedReturnAtMaturity))."
+            )
+        }
+        lines.append("")
+        lines.append("Preguntame lo que quieras sobre cualquier bono, tus rendimientos o tu saldo.")
+        return lines.joined(separator: "\n")
+    }
+
     // MARK: Data-backed fallback (no AI required, uses the actual portfolio)
 
     private func dataBackedFallback(for prompt: String) -> String {
@@ -260,12 +329,62 @@ final class PortfolioAnalysisService {
             return "Todas las inversiones en Bondi están denominadas en dólares (USD). Esto te protege de la devaluación de las monedas locales de Latinoamérica."
         }
 
+        if matches(lowered, any: [
+            "saldo", "a la vista", "disponible", "efectivo", "cash",
+            "cuanto tengo sin invertir", "liquido", "sin invertir"
+        ]) {
+            if cashBalanceUSD > 0 {
+                return "Tenés $\(fmt(cashBalanceUSD)) disponibles sin invertir. Podés usarlos para comprar más bonos desde el Catálogo."
+            }
+            return "Ahora mismo no tenés saldo disponible sin invertir. Todo está colocado en bonos o podés agregar saldo desde tu cuenta."
+        }
+
         if matches(lowered, any: ["como invert", "como compro", "como pongo plata", "como agrego", "como empiezo"]) {
             return "Para invertir: entrá al catálogo, elegí un bono que te guste, ingresá el monto en dólares y confirmá con Face ID. Tu inversión queda registrada al instante."
         }
 
         if matches(lowered, any: ["default", "impago", "puede no pagar", "y si no paga"]) {
             return "Cuando un país no puede pagar un bono se llama 'default'. Es un riesgo real aunque poco frecuente en economías estables. Por eso diversificar entre varios países ayuda a reducir ese riesgo."
+        }
+
+        if matches(lowered, any: [
+            "que bonos hay", "que bonos existen", "bonos disponibles",
+            "catalogo", "catalog", "mostrame bonos", "que ofrecen"
+        ]) {
+            return "En el catálogo de Bondi hay bonos soberanos de varios países de Latinoamérica (México, Chile, Brasil, Colombia, Perú, entre otros). Cada uno tiene su propio rendimiento, plazo y nivel de riesgo. Revisalos desde la pestaña de Catálogo."
+        }
+
+        if matches(lowered, any: [
+            "que harias", "que me recomendas", "que recomiendas",
+            "que deberia hacer", "que elegirias", "que pones",
+            "en que invertir", "consejo"
+        ]) {
+            return """
+            No puedo darte recomendaciones de inversión personalizadas, pero sí algunos criterios generales:
+            • Diversificar entre varios países reduce el riesgo
+            • Plazos más largos suelen pagar rendimientos más altos
+            • Invertí solo dinero que no necesites en el corto plazo
+            La decisión final es tuya, según tus objetivos y tolerancia al riesgo.
+            """
+        }
+
+        if matches(lowered, any: ["que pasa si", "y si quiero", "y si necesito", "que sucede si"]) {
+            return "Depende de qué sea. Los bonos se mantienen hasta su vencimiento para cobrar capital + intereses. Si surge una emergencia, algunos bonos permiten vender antes, aunque el precio puede variar. Contame más específico qué querés saber y te oriento mejor."
+        }
+
+        if matches(lowered, any: ["compara", "comparar", "diferencia entre", "cual es mejor entre"]) {
+            // Try to detect two bond mentions in the portfolio.
+            let mentioned = investments.filter { investmentMentioned($0, in: lowered) }
+            if mentioned.count >= 2 {
+                let a = mentioned[0]
+                let b = mentioned[1]
+                return "\(a.bondName): \(String(format: "%.1f", a.bondYieldAnnual))% anual, \(a.monthsRemaining) meses, $\(fmt(a.amountUSD)) invertido.\n\n\(b.bondName): \(String(format: "%.1f", b.bondYieldAnnual))% anual, \(b.monthsRemaining) meses, $\(fmt(b.amountUSD)) invertido."
+            }
+            return "Para comparar bonos fijate en tres cosas: rendimiento anual (cuánto paga), plazo (cuánto tenés que esperar) y riesgo (qué tan estable es el emisor). A mayor plazo y riesgo, suele haber mayor rendimiento."
+        }
+
+        if matches(lowered, any: ["como consigo", "como compro el bono", "como obtengo", "donde compro", "donde consigo"]) {
+            return "Para comprar un bono: andá al Catálogo, tocá el bono que te interese, ingresá el monto en dólares y confirmá con Face ID. La inversión queda registrada al instante y aparece en tu portafolio."
         }
 
         // ─── 3. Portfolio data required ──────────────────────────
@@ -283,6 +402,19 @@ final class PortfolioAnalysisService {
         let worst = investments.min(by: { $0.bondYieldAnnual < $1.bondYieldAnnual })
         let biggest = investments.max(by: { $0.amountUSD < $1.amountUSD })
         let avgYield = investments.map(\.bondYieldAnnual).reduce(0, +) / Double(investments.count)
+
+        // Specific bond name mentioned → describe that bond in detail
+        if let bond = investments.first(where: { investmentMentioned($0, in: lowered) }) {
+            let sign = bond.returnUSD >= 0 ? "+" : ""
+            return """
+            \(bond.bondCountryFlag) \(bond.bondName) — deuda soberana de \(bond.bondCountry).
+            • Rendimiento: \(String(format: "%.1f", bond.bondYieldAnnual))% anual
+            • Vence en: \(bond.monthsRemaining) mes\(bond.monthsRemaining == 1 ? "" : "es")
+            • Invertiste: $\(fmt(bond.amountUSD))
+            • Valor actual: $\(fmt(bond.currentValueUSD)) (\(sign)$\(fmt(bond.returnUSD)))
+            • Al vencimiento vas a recibir ~$\(fmt(bond.expectedReturnAtMaturity))
+            """
+        }
 
         // Specific country mentioned → describe that country's investments
         for country in countries {
@@ -438,6 +570,54 @@ final class PortfolioAnalysisService {
 
     private func matches(_ text: String, any keywords: [String]) -> Bool {
         keywords.contains { text.contains($0) }
+    }
+
+    /// Returns true if the user text mentions this specific investment by bond name.
+    /// Uses name tokens of length >= 3 that aren't generic words.
+    private func investmentMentioned(_ inv: InvestmentRecord, in normalizedText: String) -> Bool {
+        let stopwords: Set<String> = [
+            "bono", "bonos", "del", "los", "las", "para", "por", "con"
+        ]
+        let name = inv.bondName
+            .lowercased()
+            .folding(options: .diacriticInsensitive, locale: .current)
+        // Full name match
+        if normalizedText.contains(name) { return true }
+        // Distinctive token match (e.g. "cetes", "ntn", "tes")
+        let tokens = name
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { $0.count >= 3 && !stopwords.contains($0) }
+        return tokens.contains { normalizedText.contains($0) }
+    }
+
+    // MARK: Suggested prompts (surfaced in the UI)
+
+    /// Quick-reply suggestions shown as tappable chips above the input bar.
+    /// Adapts based on whether the user has investments.
+    var suggestedPrompts: [String] {
+        if investmentsSnapshot.isEmpty {
+            return [
+                "¿Qué es un bono?",
+                "¿Cómo funciona Bondi?",
+                "¿Qué es Stellar?",
+                "¿Cómo empiezo a invertir?",
+                "¿Pago impuestos?"
+            ]
+        }
+        var prompts: [String] = [
+            "¿Cómo voy?",
+            "¿Cuándo vence el próximo?",
+            "¿Cuál rinde más?",
+            "Lista mis bonos",
+            "¿Cuánto tengo disponible?",
+            "¿Qué harías?"
+        ]
+        // Country-specific prompt if user has multiple countries
+        let countries = Array(Set(investmentsSnapshot.map(\.bondCountry)))
+        if let country = countries.first, countries.count > 1 {
+            prompts.append("¿Cuánto tengo en \(country)?")
+        }
+        return prompts
     }
 
     private func fmt(_ value: Double) -> String {

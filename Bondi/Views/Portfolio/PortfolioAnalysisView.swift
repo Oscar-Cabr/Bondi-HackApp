@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PortfolioAnalysisView: View {
     let investments: [InvestmentRecord]
+    let cashBalanceUSD: Double
 
     @Environment(\.dismiss) private var dismiss
     @State private var service = PortfolioAnalysisService()
@@ -12,6 +13,7 @@ struct PortfolioAnalysisView: View {
             VStack(spacing: 0) {
                 messageList
                 Divider()
+                suggestionChips
                 inputBar
             }
             .navigationTitle("Análisis IA")
@@ -26,7 +28,7 @@ struct PortfolioAnalysisView: View {
                 }
             }
             .task {
-                await service.start(investments: investments)
+                await service.start(investments: investments, cashBalanceUSD: cashBalanceUSD)
             }
         }
     }
@@ -84,6 +86,42 @@ struct PortfolioAnalysisView: View {
         }
     }
 
+    // MARK: - Suggestion chips
+
+    @ViewBuilder
+    private var suggestionChips: some View {
+        let suggestions = service.suggestedPrompts
+        if !suggestions.isEmpty {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(suggestions, id: \.self) { suggestion in
+                        Button {
+                            Task { await service.submit(text: suggestion) }
+                        } label: {
+                            Text(suggestion)
+                                .font(.footnote.weight(.medium))
+                                .foregroundStyle(Color.bondiNavy)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 9)
+                                .background(Color.bondiGreen.opacity(0.14))
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.bondiGreen.opacity(0.35), lineWidth: 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(service.isLoading)
+                        .opacity(service.isLoading ? 0.5 : 1.0)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+            }
+            .background(Color(.systemBackground))
+        }
+    }
+
     // MARK: - Input bar
 
     private var inputBar: some View {
@@ -125,8 +163,6 @@ struct PortfolioAnalysisView: View {
 private struct MessageBubble: View {
     let message: PortfolioAnalysisService.ChatMessage
 
-    @State private var cursorVisible = true
-
     var isUser: Bool { message.role == .user }
 
     var body: some View {
@@ -134,7 +170,6 @@ private struct MessageBubble: View {
             if isUser { Spacer(minLength: 56) }
 
             if !isUser {
-                // Avatar
                 ZStack {
                     Circle()
                         .fill(Color.bondiNavy)
@@ -172,27 +207,27 @@ private struct MessageBubble: View {
                 .padding(.vertical, 10)
                 .background(Color(.secondarySystemBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        } else if message.isStreaming {
+            // Blinking cursor driven by time → zero animation state to leak.
+            TimelineView(.periodic(from: .now, by: 0.5)) { context in
+                let tick = Int(context.date.timeIntervalSinceReferenceDate * 2)
+                let on = tick % 2 == 0
+                styledText(cursor: on ? Text(" ▋").foregroundColor(Color.bondiGreen) : Text(""))
+            }
         } else {
-            (Text(message.content) + cursorText)
-                .font(.callout)
-                .foregroundStyle(isUser ? .white : .primary)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(isUser ? Color.bondiNavy : Color(.secondarySystemBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .onAppear {
-                    guard message.isStreaming else { return }
-                    withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
-                        cursorVisible = false
-                    }
-                }
+            // Finalised message — no cursor, no ticking view.
+            styledText(cursor: Text(""))
         }
     }
 
-    private var cursorText: Text {
-        guard message.isStreaming else { return Text("") }
-        return Text(cursorVisible ? " ▋" : "  ")
-            .foregroundColor(Color.bondiGreen)
+    private func styledText(cursor: Text) -> some View {
+        (Text(message.content) + cursor)
+            .font(.callout)
+            .foregroundStyle(isUser ? .white : .primary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(isUser ? Color.bondiNavy : Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
 
