@@ -68,6 +68,9 @@ private struct MainTabView: View {
 
             PortfolioView()
                 .tabItem { Label("Portafolio", systemImage: "chart.pie.fill") }
+
+            AccountView()
+                .tabItem { Label("Cuenta", systemImage: "wallet.bifold.fill") }
         }
         .tint(Color.bondiNavy)
     }

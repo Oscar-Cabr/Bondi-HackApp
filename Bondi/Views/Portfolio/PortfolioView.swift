@@ -7,6 +7,7 @@ struct PortfolioView: View {
     @Environment(Clerk.self) private var clerk
     @Query(sort: \InvestmentRecord.investedAt, order: .reverse)
     private var investments: [InvestmentRecord]
+    @State private var showAnalysis = false
 
     private var totalInvested: Double { investments.reduce(0) { $0 + $1.amountUSD } }
     private var totalCurrent: Double { investments.reduce(0) { $0 + $1.currentValueUSD } }
@@ -39,9 +40,30 @@ struct PortfolioView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    UserButton()
-                        .environment(\.clerkTheme, .bondi)
+                    HStack(spacing: 12) {
+                        Button {
+                            showAnalysis = true
+                        } label: {
+                            HStack(spacing: 5) {
+                                Image(systemName: "sparkles")
+                                    .font(.subheadline)
+                                Text("Análisis IA")
+                                    .font(.subheadline.bold())
+                            }
+                            .foregroundStyle(Color.bondiGreen)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color.bondiGreen.opacity(0.12))
+                            .clipShape(Capsule())
+                        }
+
+                        UserButton()
+                            .environment(\.clerkTheme, .bondi)
+                    }
                 }
+            }
+            .sheet(isPresented: $showAnalysis) {
+                PortfolioAnalysisView(investments: investments)
             }
         }
     }
