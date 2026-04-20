@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project context
+
+@docs/bondi-mvp.md
+@docs/bondi-prd.md
+
 ## Build & Run
 
 This is an Xcode project — there is no CLI build script. All build/run/test actions go through Xcode or `xcodebuild`.
