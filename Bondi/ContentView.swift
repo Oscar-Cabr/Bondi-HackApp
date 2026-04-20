@@ -23,23 +23,14 @@ private enum AuthSheet: Identifiable {
 
 struct ContentView: View {
     @Environment(Clerk.self) private var clerk
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @AppStorage("hasSeenPreSignUpOnboarding") private var hasSeenPreSignUpOnboarding = false
     @State private var authSheet: AuthSheet?
 
     var body: some View {
         ZStack {
             if clerk.user != nil {
-                if hasCompletedOnboarding {
-                    MainTabView()
-                        .transition(.opacity)
-                } else {
-                    OnboardingView(onComplete: {
-                        withAnimation(.easeInOut(duration: 0.35)) {
-                            hasCompletedOnboarding = true
-                        }
-                    })
+                MainTabView()
                     .transition(.opacity)
-                }
             } else {
                 LandingView(
                     onStart: { authSheet = .signUp },
@@ -49,9 +40,22 @@ struct ContentView: View {
             }
         }
         .animation(.easeInOut(duration: 0.35), value: clerk.user?.id)
+        .onChange(of: clerk.user?.id) { _, newValue in
+            if newValue == nil {
+                hasSeenPreSignUpOnboarding = false
+            }
+        }
         .sheet(item: $authSheet) { sheet in
-            AuthView(mode: sheet == .signIn ? .signIn : .signInOrUp)
-                .environment(\.clerkTheme, .bondi)
+            switch sheet {
+            case .signUp:
+                SignUpFlowView(
+                    showOnboarding: !hasSeenPreSignUpOnboarding,
+                    onOnboardingComplete: { hasSeenPreSignUpOnboarding = true }
+                )
+            case .signIn:
+                AuthView(mode: .signIn)
+                    .environment(\.clerkTheme, .bondi)
+            }
         }
     }
 }
