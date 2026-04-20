@@ -6,13 +6,31 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		416FE0932F96C3BE0036B5F9 /* ClerkKit in Frameworks */ = {isa = PBXBuildFile; productRef = 416FE0922F96C3BE0036B5F9 /* ClerkKit */; };
+		416FE0952F96C3BE0036B5F9 /* ClerkKitUI in Frameworks */ = {isa = PBXBuildFile; productRef = 416FE0942F96C3BE0036B5F9 /* ClerkKitUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		416878212F96AAC500C02D37 /* Bondi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bondi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		416FE0982F96C6610036B5F9 /* Exceptions for "Bondi" folder in "Bondi" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 416878202F96AAC500C02D37 /* Bondi */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		416878232F96AAC500C02D37 /* Bondi */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				416FE0982F96C6610036B5F9 /* Exceptions for "Bondi" folder in "Bondi" target */,
+			);
 			path = Bondi;
 			sourceTree = "<group>";
 		};
@@ -23,6 +41,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				416FE0932F96C3BE0036B5F9 /* ClerkKit in Frameworks */,
+				416FE0952F96C3BE0036B5F9 /* ClerkKitUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +85,8 @@
 			);
 			name = Bondi;
 			packageProductDependencies = (
+				416FE0922F96C3BE0036B5F9 /* ClerkKit */,
+				416FE0942F96C3BE0036B5F9 /* ClerkKitUI */,
 			);
 			productName = Bondi;
 			productReference = 416878212F96AAC500C02D37 /* Bondi.app */;
@@ -94,6 +116,9 @@
 			);
 			mainGroup = 416878182F96AAC500C02D37;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				416FE0912F96C3BE0036B5F9 /* XCRemoteSwiftPackageReference "clerk-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 416878222F96AAC500C02D37 /* Products */;
 			projectDirPath = "";
@@ -251,11 +276,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Bondi/Bondi.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V47DSZ3W28;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Bondi/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -283,11 +310,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Bondi/Bondi.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V47DSZ3W28;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Bondi/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -332,6 +361,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		416FE0912F96C3BE0036B5F9 /* XCRemoteSwiftPackageReference "clerk-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/clerk/clerk-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.9;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		416FE0922F96C3BE0036B5F9 /* ClerkKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 416FE0912F96C3BE0036B5F9 /* XCRemoteSwiftPackageReference "clerk-ios" */;
+			productName = ClerkKit;
+		};
+		416FE0942F96C3BE0036B5F9 /* ClerkKitUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 416FE0912F96C3BE0036B5F9 /* XCRemoteSwiftPackageReference "clerk-ios" */;
+			productName = ClerkKitUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 416878192F96AAC500C02D37 /* Project object */;
 }

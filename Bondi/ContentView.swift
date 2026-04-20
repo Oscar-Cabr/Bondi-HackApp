@@ -5,47 +5,53 @@
 //  Created by Andrés Rodríguez Montes de Oca on 20/04/26.
 //
 
+import ClerkKit
+import ClerkKitUI
 import SwiftUI
 
-enum AppRoute {
-    case landing
-    case onboarding
-    case main
+private enum AuthSheet: Identifiable {
+    case signUp
+    case signIn
+
+    var id: Int {
+        switch self {
+        case .signUp: return 0
+        case .signIn: return 1
+        }
+    }
 }
 
 struct ContentView: View {
-    @State private var route: AppRoute = .landing
+    @Environment(Clerk.self) private var clerk
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @State private var authSheet: AuthSheet?
 
     var body: some View {
         ZStack {
-            switch route {
-            case .landing:
-                LandingView(
-                    onStart: {
-                        withAnimation(.easeInOut(duration: 0.45)) {
-                            route = .onboarding
+            if clerk.user != nil {
+                if hasCompletedOnboarding {
+                    MainTabView()
+                        .transition(.opacity)
+                } else {
+                    OnboardingView(onComplete: {
+                        withAnimation(.easeInOut(duration: 0.35)) {
+                            hasCompletedOnboarding = true
                         }
-                    },
-                    onSignIn: {
-                        withAnimation(.easeInOut(duration: 0.45)) {
-                            route = .main
-                        }
-                    }
-                )
-                .transition(.opacity.combined(with: .move(edge: .leading)))
-
-            case .onboarding:
-                OnboardingView(onComplete: {
-                    withAnimation(.easeInOut(duration: 0.35)) {
-                        route = .main
-                    }
-                })
-                .transition(.opacity)
-
-            case .main:
-                MainTabView()
+                    })
                     .transition(.opacity)
+                }
+            } else {
+                LandingView(
+                    onStart: { authSheet = .signUp },
+                    onSignIn: { authSheet = .signIn }
+                )
+                .transition(.opacity)
             }
+        }
+        .animation(.easeInOut(duration: 0.35), value: clerk.user?.id)
+        .sheet(item: $authSheet) { sheet in
+            AuthView(mode: sheet == .signIn ? .signIn : .signInOrUp)
+                .environment(\.clerkTheme, .bondi)
         }
     }
 }
@@ -65,4 +71,5 @@ private struct MainTabView: View {
 
 #Preview {
     ContentView()
+        .environment(Clerk.shared)
 }
