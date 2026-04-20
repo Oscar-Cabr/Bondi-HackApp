@@ -1,79 +1,42 @@
 import ClerkKit
 import ClerkKitUI
+import SwiftData
 import SwiftUI
 
 struct PortfolioView: View {
     @Environment(Clerk.self) private var clerk
-    private let investments = MockData.investments
+    @Query(sort: \InvestmentRecord.investedAt, order: .reverse)
+    private var investments: [InvestmentRecord]
 
     private var totalInvested: Double { investments.reduce(0) { $0 + $1.amountUSD } }
     private var totalCurrent: Double { investments.reduce(0) { $0 + $1.currentValueUSD } }
     private var totalReturn: Double { totalCurrent - totalInvested }
     private var totalReturnPercent: Double { totalInvested > 0 ? totalReturn / totalInvested * 100 : 0 }
 
+    private var upcomingMaturities: [InvestmentRecord] {
+        investments
+            .filter { !$0.isMatured }
+            .sorted { $0.bondMaturityDate < $1.bondMaturityDate }
+    }
+
     private var greeting: String {
         if let first = clerk.user?.firstName, !first.isEmpty {
-            return "Hola, \(first)"
+            return "Hola, \(first) 👋"
         }
-        return "Valor total"
+        return "Mi portafolio"
     }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Balance card
-                    VStack(spacing: 8) {
-                        Text(greeting)
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.8))
-                        Text("$\(totalCurrent, specifier: "%.2f")")
-                            .font(.system(size: 44, weight: .bold))
-                            .foregroundStyle(.white)
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.up.right")
-                            Text("$\(totalReturn, specifier: "%.2f") (\(totalReturnPercent, specifier: "%.2f")%)")
-                        }
-                        .font(.subheadline)
-                        .foregroundStyle(Color.bondiGreen)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(24)
-                    .background(Color.bondiNavy)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .padding(.horizontal)
-
-                    // Active investments
-                    SectionHeader(title: "Mis inversiones")
-
-                    if investments.isEmpty {
-                        ContentUnavailableView(
-                            "Sin inversiones aún",
-                            systemImage: "chart.pie",
-                            description: Text("Explora el catálogo y realiza tu primera inversión")
-                        )
-                    } else {
-                        VStack(spacing: 10) {
-                            ForEach(investments) { investment in
-                                InvestmentRow(investment: investment)
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-
-                    // Upcoming maturities
-                    SectionHeader(title: "Próximos vencimientos")
-
-                    VStack(spacing: 10) {
-                        ForEach(investments.sorted { $0.bond.maturityDate < $1.bond.maturityDate }) { investment in
-                            MaturityRow(investment: investment)
-                        }
-                    }
-                    .padding(.horizontal)
+            Group {
+                if investments.isEmpty {
+                    emptyState
+                } else {
+                    portfolioContent
                 }
-                .padding(.vertical)
             }
-            .navigationTitle("Mi Portafolio")
+            .navigationTitle(greeting)
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     UserButton()
@@ -82,7 +45,75 @@ struct PortfolioView: View {
             }
         }
     }
+
+    // MARK: Empty state
+
+    private var emptyState: some View {
+        ContentUnavailableView {
+            Label("Sin inversiones aún", systemImage: "chart.pie")
+        } description: {
+            Text("Explorá el catálogo y realizá tu primera inversión desde $5.")
+        }
+    }
+
+    // MARK: Portfolio content
+
+    private var portfolioContent: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                balanceCard
+                    .padding(.horizontal)
+
+                SectionHeader(title: "Mis inversiones")
+                VStack(spacing: 10) {
+                    ForEach(investments) { record in
+                        InvestmentRow(record: record)
+                    }
+                }
+                .padding(.horizontal)
+
+                if !upcomingMaturities.isEmpty {
+                    SectionHeader(title: "Próximos vencimientos")
+                    VStack(spacing: 10) {
+                        ForEach(upcomingMaturities) { record in
+                            MaturityRow(record: record)
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            }
+            .padding(.vertical)
+        }
+    }
+
+    // MARK: Balance card
+
+    private var balanceCard: some View {
+        VStack(spacing: 8) {
+            Text("Valor total")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.8))
+
+            Text(totalCurrent, format: .currency(code: "USD"))
+                .font(.system(size: 44, weight: .bold))
+                .foregroundStyle(.white)
+
+            HStack(spacing: 4) {
+                Image(systemName: totalReturn >= 0 ? "arrow.up.right" : "arrow.down.right")
+                Text(totalReturn, format: .currency(code: "USD"))
+                Text("(\(totalReturnPercent, specifier: "%.2f")%)")
+            }
+            .font(.subheadline)
+            .foregroundStyle(totalReturn >= 0 ? Color.bondiGreen : Color.bondiRed)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(24)
+        .background(Color.bondiNavy)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
 }
+
+// MARK: - Subviews
 
 private struct SectionHeader: View {
     let title: String
@@ -95,15 +126,15 @@ private struct SectionHeader: View {
 }
 
 private struct InvestmentRow: View {
-    let investment: Investment
+    let record: InvestmentRecord
 
     var body: some View {
         HStack(spacing: 12) {
-            Text(investment.bond.countryFlag).font(.title2)
+            Text(record.bondCountryFlag).font(.title2)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(investment.bond.name).font(.subheadline.bold())
-                Text("Invertido: $\(investment.amountUSD, specifier: "%.2f")")
+                Text(record.bondName).font(.subheadline.bold())
+                Text("Invertido: \(record.amountUSD, format: .currency(code: "USD"))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -111,10 +142,11 @@ private struct InvestmentRow: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 2) {
-                Text("$\(investment.currentValueUSD, specifier: "%.2f")").font(.subheadline.bold())
+                Text(record.currentValueUSD, format: .currency(code: "USD"))
+                    .font(.subheadline.bold())
                 HStack(spacing: 2) {
                     Image(systemName: "arrow.up.right").font(.caption2)
-                    Text("\(investment.returnPercent, specifier: "%.2f")%").font(.caption)
+                    Text("\(record.returnPercent, specifier: "%.2f")%").font(.caption)
                 }
                 .foregroundStyle(Color.bondiGreen)
             }
@@ -126,24 +158,29 @@ private struct InvestmentRow: View {
 }
 
 private struct MaturityRow: View {
-    let investment: Investment
+    let record: InvestmentRecord
 
     var body: some View {
         HStack(spacing: 12) {
-            Text(investment.bond.countryFlag).font(.title3)
+            Text(record.bondCountryFlag).font(.title3)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(investment.bond.name).font(.subheadline.bold())
-                Text(investment.bond.maturityDate, style: .date)
+                Text(record.bondName).font(.subheadline.bold())
+                Text(record.bondMaturityDate, style: .date)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
             Spacer()
 
-            Text("$\(investment.expectedReturnAtMaturity, specifier: "%.2f")")
-                .font(.subheadline)
-                .foregroundStyle(Color.bondiGreen)
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(record.expectedReturnAtMaturity, format: .currency(code: "USD"))
+                    .font(.subheadline)
+                    .foregroundStyle(Color.bondiGreen)
+                Text("\(record.monthsRemaining)m restantes")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding()
         .background(Color.bondiCard)

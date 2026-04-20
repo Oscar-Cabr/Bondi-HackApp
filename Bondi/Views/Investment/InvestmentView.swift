@@ -1,5 +1,6 @@
-import SwiftUI
 import LocalAuthentication
+import SwiftData
+import SwiftUI
 
 struct InvestmentView: View {
     let bond: Bond
@@ -7,6 +8,7 @@ struct InvestmentView: View {
     @State private var step: Step = .amount
     @State private var isProcessing = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
 
     init(bond: Bond, initialAmount: Double) {
         self.bond = bond
@@ -230,17 +232,28 @@ struct InvestmentView: View {
             ) { success, _ in
                 DispatchQueue.main.async {
                     isProcessing = false
-                    if success { step = .success }
+                    if success { saveAndConfirm() }
                 }
             }
         } else {
-            // Simulator fallback
+            // Simulator / no biometrics fallback
             isProcessing = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 isProcessing = false
-                step = .success
+                saveAndConfirm()
             }
         }
+    }
+
+    private func saveAndConfirm() {
+        let record = InvestmentRecord(
+            bond: bond,
+            amountUSD: amount,
+            feeUSD: fee
+        )
+        modelContext.insert(record)
+        try? modelContext.save()
+        step = .success
     }
 }
 
