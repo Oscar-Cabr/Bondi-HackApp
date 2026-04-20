@@ -8,14 +8,27 @@
 import SwiftUI
 
 struct ContentView: View {
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        if hasCompletedOnboarding {
+            MainTabView()
+        } else {
+            OnboardingView(onComplete: { hasCompletedOnboarding = true })
         }
-        .padding()
+    }
+}
+
+private struct MainTabView: View {
+    var body: some View {
+        TabView {
+            CatalogView()
+                .tabItem { Label("Explorar", systemImage: "magnifyingglass") }
+
+            PortfolioView()
+                .tabItem { Label("Portafolio", systemImage: "chart.pie.fill") }
+        }
+        .tint(Color.bondiNavy)
     }
 }
 
