@@ -7,14 +7,45 @@
 
 import SwiftUI
 
+enum AppRoute {
+    case landing
+    case onboarding
+    case main
+}
+
 struct ContentView: View {
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @State private var route: AppRoute = .landing
 
     var body: some View {
-        if hasCompletedOnboarding {
-            MainTabView()
-        } else {
-            OnboardingView(onComplete: { hasCompletedOnboarding = true })
+        ZStack {
+            switch route {
+            case .landing:
+                LandingView(
+                    onStart: {
+                        withAnimation(.easeInOut(duration: 0.45)) {
+                            route = .onboarding
+                        }
+                    },
+                    onSignIn: {
+                        withAnimation(.easeInOut(duration: 0.45)) {
+                            route = .main
+                        }
+                    }
+                )
+                .transition(.opacity.combined(with: .move(edge: .leading)))
+
+            case .onboarding:
+                OnboardingView(onComplete: {
+                    withAnimation(.easeInOut(duration: 0.35)) {
+                        route = .main
+                    }
+                })
+                .transition(.opacity)
+
+            case .main:
+                MainTabView()
+                    .transition(.opacity)
+            }
         }
     }
 }
