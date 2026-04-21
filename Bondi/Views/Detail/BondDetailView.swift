@@ -6,6 +6,7 @@ struct BondDetailView: View {
     @State private var investmentAmount: Double = 50
     @State private var showInvestmentSheet = false
     @State private var explainer = BondExplainerService()
+    @State private var isAIExpanded = false
 
     private var projectedReturn: Double {
         bond.projectedReturn(for: investmentAmount)
@@ -21,7 +22,6 @@ struct BondDetailView: View {
 
                     VStack(alignment: .leading, spacing: 20) {
                         statsRow
-                        Divider().opacity(0.5)
                         aiExplanationSection
                         Divider().opacity(0.5)
                         simulatorSection
@@ -82,6 +82,12 @@ struct BondDetailView: View {
                     .frame(maxWidth: .infinity, alignment: .bottom)
                     .frame(height: 280, alignment: .bottom)
                     .clipped()
+                    .overlay(
+                        Color.bondiGreen
+                            .opacity(0.18)
+                            .blendMode(.multiply)
+                            .allowsHitTesting(false)
+                    )
                     .overlay(alignment: .bottomLeading) {
                         HStack(spacing: 10) {
                             Text(bond.countryFlag)
@@ -135,52 +141,105 @@ struct BondDetailView: View {
 
     // MARK: - AI Explanation
     private var aiExplanationSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 0) {
             aiSectionHeader
 
-            switch explainer.state {
-            case .idle:
-                EmptyView()
-
-            case .failed:
-                Text("No se pudo generar la explicación.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-
-            case .streaming(let text):
-                StreamingTextCard(text: text, isStreaming: true, isAI: false)
-
-            case .ready(let text):
-                StreamingTextCard(text: text, isStreaming: false, isAI: true)
-
-            case .fallback(let text):
-                StreamingTextCard(text: text, isStreaming: false, isAI: false)
+            if isAIExpanded {
+                aiExplanationContent
+                    .padding(.top, 12)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .move(edge: .top)),
+                        removal: .opacity
+                    ))
             }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.bondiGreen.opacity(0.18),
+                            Color.bondiGreenLight.opacity(0.10),
+                            Color.white.opacity(0.6)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(
+                    LinearGradient(
+                        colors: [Color.bondiGreen.opacity(0.55), Color.bondiGreenLight.opacity(0.25)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        )
+        .shadow(color: Color.bondiGreen.opacity(0.18), radius: 14, y: 6)
+        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: isAIExpanded)
+    }
+
+    @ViewBuilder
+    private var aiExplanationContent: some View {
+        switch explainer.state {
+        case .idle:
+            EmptyView()
+
+        case .failed:
+            Text("No se pudo generar la explicación.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+
+        case .streaming(let text):
+            StreamingTextCard(text: text, isStreaming: true, isAI: false)
+
+        case .ready(let text):
+            StreamingTextCard(text: text, isStreaming: false, isAI: true)
+
+        case .fallback(let text):
+            StreamingTextCard(text: text, isStreaming: false, isAI: false)
         }
     }
 
     private var aiSectionHeader: some View {
-        HStack(spacing: 8) {
-            Label("¿Qué significa esto?", systemImage: "sparkles")
-                .font(.headline)
-                .foregroundStyle(Color.bondiNavy)
-
-            Spacer()
-
-            if case .ready = explainer.state {
-                HStack(spacing: 4) {
-                    Image(systemName: "apple.intelligence")
-                        .font(.caption2)
-                    Text("Apple Intelligence")
-                        .font(.caption2.bold())
-                }
-                .foregroundStyle(Color.bondiGreen)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.bondiGreen.opacity(0.12))
-                .clipShape(Capsule())
+        Button {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                isAIExpanded.toggle()
             }
+        } label: {
+            HStack(spacing: 8) {
+                Label("¿Qué significa esto?", systemImage: "sparkles")
+                    .font(.headline)
+                    .foregroundStyle(Color.bondiNavy)
+
+                Spacer()
+
+                if case .ready = explainer.state {
+                    HStack(spacing: 4) {
+                        Image(systemName: "apple.intelligence")
+                            .font(.caption2)
+                        Text("Apple Intelligence")
+                            .font(.caption2.bold())
+                    }
+                    .foregroundStyle(Color.bondiGreen)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.bondiGreen.opacity(0.18))
+                    .clipShape(Capsule())
+                }
+
+                Image(systemName: "chevron.down")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.bondiNavy.opacity(0.6))
+                    .rotationEffect(.degrees(isAIExpanded ? 0 : -90))
+            }
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Simulator
