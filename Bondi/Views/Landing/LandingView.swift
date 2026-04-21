@@ -87,7 +87,7 @@ struct LandingView: View {
                         .foregroundStyle(Color.bondiNavy)
                 }
                 Text("Bondi")
-                    .font(.system(.title3, design: .rounded, weight: .bold))
+                    .font(.bondiTitle3)
                     .foregroundStyle(.white)
             }
 
@@ -112,17 +112,18 @@ struct LandingView: View {
                 Text("Invierte en bonos\ndesde ")
                     .foregroundColor(.white)
                 + Text("$5")
-                    .font(.system(size: 34, weight: .heavy, design: .rounded))
+                    .font(.system(size: 34, weight: .bold, design: .serif))
                     .foregroundColor(Color.bondiGreen)
             )
-            .font(.system(size: 34, weight: .bold, design: .rounded))
+            .font(.system(size: 32, weight: .bold, design: .serif))
             .multilineTextAlignment(.center)
+            .lineSpacing(2)
 
             Text("La IA te explica todo en español.\nSin jerga, sin brokers, sin fricción.")
-                .font(.system(size: 15, weight: .regular, design: .rounded))
+                .font(.bondiCallout)
                 .foregroundStyle(.white.opacity(0.75))
                 .multilineTextAlignment(.center)
-                .lineSpacing(2)
+                .lineSpacing(3)
         }
     }
 
@@ -159,66 +160,23 @@ struct LandingView: View {
     }
 
     private var cta: some View {
-        VStack(spacing: 14) {
-            Button(action: onStart) {
-                HStack(spacing: 10) {
-                    Text("Crear mi cuenta")
-                        .font(.system(.headline, design: .rounded, weight: .semibold))
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 14, weight: .bold))
-                }
-                .foregroundStyle(Color.bondiNavy)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
-                .background(
-                    ZStack {
-                        LinearGradient(
-                            colors: [Color.bondiGreen, Color.bondiGreenLight],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                        LinearGradient(
-                            colors: [.white.opacity(0.45), .clear],
-                            startPoint: .top,
-                            endPoint: .center
-                        )
-                    }
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
-            }
-            .buttonStyle(PressableButtonStyle())
+        VStack(spacing: 12) {
+            Button("Crear mi cuenta", action: onStart)
+                .buttonStyle(BondiPrimaryButtonStyle(icon: "arrow.right"))
 
             Button(action: onSignIn) {
                 HStack(spacing: 6) {
                     Text("¿Ya tienes cuenta?")
                         .foregroundStyle(.white.opacity(0.7))
                     Text("Iniciar sesión")
-                        .foregroundStyle(Color.bondiGreen)
+                        .foregroundStyle(Color.bondiGreenLight)
                         .fontWeight(.semibold)
                 }
-                .font(.system(size: 14, design: .rounded))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .background(
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(.white.opacity(0.06))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .stroke(.white.opacity(0.18), lineWidth: 1)
-                        )
-                )
+                .font(.bondiSubheadline)
             }
-            .buttonStyle(PressableButtonStyle())
+            .buttonStyle(.plain)
+            .padding(.top, 4)
         }
-    }
-}
-
-private struct PressableButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
-            .animation(.spring(response: 0.25, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }
 
@@ -282,7 +240,7 @@ private struct BondHeroCard: View {
                                 .tracking(1.2)
                                 .foregroundStyle(.white.opacity(0.55))
                             Text("México · Serie M")
-                                .font(.system(.headline, design: .rounded, weight: .semibold))
+                                .font(.bondiHeadline)
                                 .foregroundStyle(.white)
                         }
                         Spacer()
@@ -296,11 +254,11 @@ private struct BondHeroCard: View {
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
                         AnimatedYieldText(value: animatedYield)
                         Text("%")
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
+                            .font(.system(size: 22, weight: .bold, design: .serif))
                             .foregroundStyle(Color.bondiGreen)
                             .baselineOffset(4)
                         Text("anual")
-                            .font(.system(size: 13, design: .rounded))
+                            .font(.bondiCaption)
                             .foregroundStyle(.white.opacity(0.55))
                             .padding(.leading, 2)
                     }
@@ -374,7 +332,7 @@ private struct AnimatedYieldText: View {
 
     var body: some View {
         Text(String(format: "%.1f", value))
-            .font(.system(size: 56, weight: .heavy, design: .rounded))
+            .font(.system(size: 54, weight: .bold, design: .serif))
             .foregroundStyle(
                 LinearGradient(
                     colors: [.white, Color.bondiGreen],

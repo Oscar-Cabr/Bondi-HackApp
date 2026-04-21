@@ -28,7 +28,8 @@ struct PortfolioAnalysisView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Cerrar") { dismiss() }
-                        .foregroundStyle(Color.bondiNavy)
+                        .font(.bondiSubheadline.weight(.medium))
+                        .foregroundStyle(Color.bondiGreenLight)
                 }
             }
             .task {
@@ -43,14 +44,19 @@ struct PortfolioAnalysisView: View {
             Image(systemName: "apple.intelligence")
                 .font(.caption)
             Text("Apple Intelligence")
-                .font(.caption.bold())
+                .font(.bondiCaption.weight(.bold))
         }
         .foregroundStyle(Color.bondiGreen)
-        .padding(.horizontal, 9)
+        .padding(.horizontal, 10)
         .padding(.vertical, 5)
-        .background(Color.bondiCardLight)
-        .clipShape(Capsule())
-        .shadow(color: Color.bondiNavy.opacity(0.05), radius: 4, y: 2)
+        .background(
+            Capsule()
+                .fill(Color.bondiCardLight.opacity(0.7))
+        )
+        .overlay(
+            Capsule()
+                .stroke(Color.bondiGreen.opacity(0.35), lineWidth: 1)
+        )
     }
 
     // MARK: - Message list
@@ -101,15 +107,17 @@ struct PortfolioAnalysisView: View {
                             Task { await service.submit(text: suggestion) }
                         } label: {
                             Text(suggestion)
-                                .font(.footnote.weight(.medium))
-                                .foregroundStyle(Color.bondiNavy)
+                                .font(.bondiCaption.weight(.semibold))
+                                .foregroundStyle(Color.bondiGreenLight)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 9)
-                                .background(Color.bondiGreen.opacity(0.14))
-                                .clipShape(Capsule())
+                                .background(
+                                    Capsule()
+                                        .fill(Color.bondiCardLight.opacity(0.55))
+                                )
                                 .overlay(
                                     Capsule()
-                                        .stroke(Color.bondiGreen.opacity(0.35), lineWidth: 1)
+                                        .stroke(Color.bondiGreen.opacity(0.4), lineWidth: 1)
                                 )
                         }
                         .buttonStyle(.plain)
@@ -120,7 +128,7 @@ struct PortfolioAnalysisView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
             }
-            .background(Color(.systemBackground))
+            .background(Color.bondiSoftBackground)
         }
     }
 
@@ -129,18 +137,24 @@ struct PortfolioAnalysisView: View {
         HStack(spacing: 10) {
             TextField("Preguntá sobre tu portafolio…", text: $service.inputText, axis: .vertical)
                 .lineLimit(1...4)
-                .font(.callout)
+                .font(.bondiCallout)
+                .foregroundStyle(Color.bondiNavy)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(Color.bondiCardLight)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-                .shadow(color: Color.bondiNavy.opacity(0.03), radius: 5, y: -2)
+                .background(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(Color.bondiCardLight.opacity(0.6))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(Color.bondiGreen.opacity(0.25), lineWidth: 1)
+                )
                 .onSubmit { sendMessage() }
 
             Button(action: sendMessage) {
                 Image(systemName: service.isLoading ? "ellipsis" : "arrow.up.circle.fill")
-                    .font(.system(size: 30))
-                    .foregroundStyle(canSend ? Color.bondiGreen : Color.bondiNavy.opacity(0.2))
+                    .font(.system(size: 32))
+                    .foregroundStyle(canSend ? Color.bondiGreen : Color.bondiCardLight)
                     .symbolEffect(.pulse, isActive: service.isLoading)
             }
             .disabled(!canSend)
@@ -226,12 +240,14 @@ private struct MessageBubble: View {
 
     private func styledText(cursor: Text) -> some View {
         (Text(message.content) + cursor)
-            .font(.callout)
-            .foregroundStyle(isUser ? .white : .primary)
+            .font(.bondiCallout)
+            .foregroundStyle(isUser ? Color.bondiSoftBackground : Color.bondiNavy)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(isUser ? Color.bondiNavy : Color(.secondarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(isUser ? Color.bondiGreen : Color.bondiCardLight)
+            )
     }
 }
 
@@ -243,7 +259,7 @@ private struct TypingIndicator: View {
         HStack(spacing: 4) {
             ForEach(0..<3, id: \.self) { i in
                 Circle()
-                    .fill(Color.bondiNavy.opacity(0.4))
+                    .fill(Color.bondiGreen.opacity(0.6))
                     .frame(width: 7, height: 7)
                     .offset(y: animating ? -4 : 0)
                     .animation(

@@ -38,9 +38,10 @@ struct InvestmentView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if step != .success {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancelar") { dismiss() }
-                            .foregroundStyle(Color.bondiNavy)
+            ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancelar") { dismiss() }
+                        .font(.bondiSubheadline.weight(.medium))
+                        .foregroundStyle(Color.bondiGreenLight)
                     }
                 }
             }
@@ -54,84 +55,69 @@ struct InvestmentView: View {
             HStack {
                 Text(bond.countryFlag).font(.title2)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(bond.name).font(.headline).foregroundStyle(Color.bondiNavy)
+                    Text(bond.name).font(.bondiHeadline).foregroundStyle(Color.bondiNavy)
                     Text("\(String(format: "%.1f", bond.yieldAnnual))% anual · \(bond.monthsToMaturity) meses")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.bondiCaption).foregroundStyle(.secondary)
                 }
                 Spacer()
             }
             .padding()
             .background(Color.bondiCardLight)
             .clipShape(RoundedRectangle(cornerRadius: 16))
-            .shadow(color: Color.bondiNavy.opacity(0.03), radius: 10, y: 4)
+            .shadow(color: Color.black.opacity(0.18), radius: 10, y: 4)
 
-            // Preset amounts
-            HStack(spacing: 6) {
+            HStack(spacing: 8) {
                 ForEach([5, 10, 25, 50, 100], id: \.self) { preset in
+                    let selected = amount == Double(preset)
                     Button("$\(preset)") { amount = Double(preset) }
-                        .font(.subheadline.weight(.semibold))
+                        .font(.bondiSubheadline.weight(.semibold))
+                        .foregroundStyle(selected ? Color.bondiSoftBackground : Color.bondiGreenLight)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(amount == Double(preset) ? Color.bondiNavy : Color.bondiCardLight)
-                        .foregroundStyle(amount == Double(preset) ? .white : Color.bondiNavy)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .shadow(color: Color.bondiNavy.opacity(0.04), radius: 4, y: 2)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(selected ? Color.bondiGreen : Color.bondiCardLight.opacity(0.55))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(selected ? Color.clear : Color.bondiGreen.opacity(0.3), lineWidth: 1)
+                        )
                 }
             }
 
-            // Big amount display
             VStack(spacing: 2) {
                 Text("$\(Int(amount))")
-                    .font(.system(size: 56, weight: .heavy, design: .rounded))
+                    .font(.bondiNumericLarge)
                     .foregroundStyle(Color.bondiNavy)
+                    .monospacedDigit()
                 Text("USD")
                     .foregroundStyle(.secondary)
-                    .font(.headline)
+                    .font(.bondiSubheadline.weight(.semibold))
+                    .tracking(2)
             }
             .padding(.vertical, 20)
 
             Slider(value: $amount, in: 5...500, step: 5)
                 .tint(Color.bondiGreen)
 
-            // Projected return
             HStack {
                 Text("Recibirás en \(bond.monthsToMaturity) meses:")
+                    .font(.bondiSubheadline)
                     .foregroundStyle(.secondary)
                 Spacer()
                 Text("$\(expectedReturn, specifier: "%.2f")")
-                    .font(.title3.bold())
+                    .font(.bondiNumeric)
                     .foregroundStyle(Color.bondiGreen)
             }
             .padding()
             .background(Color.bondiCardLight)
             .clipShape(RoundedRectangle(cornerRadius: 16))
-            .shadow(color: Color.bondiNavy.opacity(0.03), radius: 10, y: 4)
+            .shadow(color: Color.black.opacity(0.18), radius: 10, y: 4)
 
             Spacer()
 
-            Button(action: { step = .review }) {
-                Text("Revisar inversión")
-                    .font(.system(.headline, design: .rounded, weight: .semibold))
-                    .foregroundStyle(Color.bondiNavy)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(
-                        ZStack {
-                            LinearGradient(
-                                colors: [Color.bondiGreen, Color.bondiGreenLight],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                            LinearGradient(
-                                colors: [.white.opacity(0.45), .clear],
-                                startPoint: .top,
-                                endPoint: .center
-                            )
-                        }
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
-            }
+            Button("Revisar inversión") { step = .review }
+                .buttonStyle(BondiPrimaryButtonStyle(icon: "arrow.right"))
         }
         .padding()
     }
@@ -143,83 +129,66 @@ struct InvestmentView: View {
                 VStack(spacing: 16) {
                     HStack {
                         Text(bond.countryFlag).font(.title2)
-                        Text(bond.name).font(.headline).foregroundStyle(Color.bondiNavy)
+                        Text(bond.name).font(.bondiHeadline).foregroundStyle(Color.bondiNavy)
                         Spacer()
                     }
 
-                    Divider()
+                    Divider().opacity(0.4)
 
                     VStack(spacing: 12) {
                         SummaryRow(label: "Monto invertido", value: "$\(String(format: "%.2f", amount))")
                         SummaryRow(label: "Fee Bondi (1%)", value: "- $\(String(format: "%.2f", fee))", isNegative: true)
-                        Divider().opacity(0.5)
+                        Divider().opacity(0.4)
                         SummaryRow(label: "Total debitado", value: "$\(String(format: "%.2f", totalDebited))", isBold: true)
                     }
                     .padding()
                     .background(Color.bondiCardLight)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: Color.bondiNavy.opacity(0.03), radius: 10, y: 4)
+                    .shadow(color: Color.black.opacity(0.18), radius: 10, y: 4)
 
                     VStack(spacing: 10) {
                         HStack {
-                            Text("Rendimiento esperado").foregroundStyle(Color.bondiNavy)
+                            Text("Rendimiento esperado")
+                                .font(.bondiSubheadline)
+                                .foregroundStyle(Color.bondiNavy)
                             Spacer()
                             Text("+ $\(String(format: "%.2f", expectedReturn - amount))")
+                                .font(.bondiSubheadline.weight(.semibold))
                                 .foregroundStyle(Color.bondiGreen)
-                                .fontWeight(.semibold)
                         }
                         HStack {
-                            Text("Recibirás:").font(.headline).foregroundStyle(Color.bondiNavy)
+                            Text("Recibirás:")
+                                .font(.bondiHeadline)
+                                .foregroundStyle(Color.bondiNavy)
                             Spacer()
                             Text("$\(String(format: "%.2f", expectedReturn))")
-                                .font(.headline)
+                                .font(.bondiNumericSmall)
                                 .foregroundStyle(Color.bondiGreen)
                         }
                         HStack {
-                            Text("Fecha estimada:").foregroundStyle(.secondary)
+                            Text("Fecha estimada:")
+                                .font(.bondiSubheadline)
+                                .foregroundStyle(.secondary)
                             Spacer()
-                            Text(bond.maturityDate, style: .date).foregroundStyle(.secondary)
+                            Text(bond.maturityDate, style: .date)
+                                .font(.bondiSubheadline)
+                                .foregroundStyle(.secondary)
                         }
                     }
                     .padding()
                     .background(Color.bondiCardLight)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: Color.bondiNavy.opacity(0.03), radius: 10, y: 4)
+                    .shadow(color: Color.black.opacity(0.18), radius: 10, y: 4)
                 }
                 .padding()
             }
 
-            Button(action: confirmWithBiometrics) {
-                HStack {
-                    Image(systemName: "faceid")
-                    Text(isProcessing ? "Procesando..." : "Confirmar con Face ID")
-                }
-                .font(.system(.headline, design: .rounded, weight: .semibold))
-                .foregroundStyle(Color.bondiNavy)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
-                .background(
-                    ZStack {
-                        if isProcessing {
-                            Color.bondiGreen.opacity(0.5)
-                        } else {
-                            LinearGradient(
-                                colors: [Color.bondiGreen, Color.bondiGreenLight],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                            LinearGradient(
-                                colors: [.white.opacity(0.45), .clear],
-                                startPoint: .top,
-                                endPoint: .center
-                            )
-                        }
-                    }
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .shadow(color: isProcessing ? .clear : Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
+            Button(isProcessing ? "Procesando..." : "Confirmar con Face ID") {
+                confirmWithBiometrics()
             }
+            .buttonStyle(BondiPrimaryButtonStyle(icon: "faceid"))
             .disabled(isProcessing)
+            .opacity(isProcessing ? 0.7 : 1)
             .padding()
         }
     }
@@ -236,47 +205,32 @@ struct InvestmentView: View {
 
             VStack(spacing: 8) {
                 Text("¡Inversión exitosa!")
-                    .font(.title.bold())
+                    .font(.bondiTitle)
                     .foregroundStyle(Color.bondiNavy)
                 Text("Invertiste $\(String(format: "%.2f", amount)) en \(bond.name)")
+                    .font(.bondiBody)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
             }
 
             VStack(spacing: 4) {
-                Text("Recibirás").foregroundStyle(.secondary)
+                Text("Recibirás")
+                    .font(.bondiSubheadline)
+                    .foregroundStyle(.secondary)
                 Text("$\(String(format: "%.2f", expectedReturn))")
-                    .font(.system(size: 44, weight: .heavy, design: .rounded))
+                    .font(.bondiNumericLarge)
                     .foregroundStyle(Color.bondiGreen)
-                Text(bond.maturityDate, style: .date).foregroundStyle(.secondary)
+                    .monospacedDigit()
+                Text(bond.maturityDate, style: .date)
+                    .font(.bondiSubheadline)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
 
-            Button(action: { dismiss() }) {
-                Text("Ver mi portafolio")
-                    .font(.system(.headline, design: .rounded, weight: .semibold))
-                    .foregroundStyle(Color.bondiNavy)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(
-                        ZStack {
-                            LinearGradient(
-                                colors: [Color.bondiGreen, Color.bondiGreenLight],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                            LinearGradient(
-                                colors: [.white.opacity(0.45), .clear],
-                                startPoint: .top,
-                                endPoint: .center
-                            )
-                        }
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
-            }
-            .padding()
+            Button("Ver mi portafolio") { dismiss() }
+                .buttonStyle(BondiPrimaryButtonStyle(icon: "chart.pie.fill"))
+                .padding()
         }
     }
 
@@ -326,11 +280,11 @@ private struct SummaryRow: View {
     var body: some View {
         HStack {
             Text(label)
-                .fontWeight(isBold ? .semibold : .regular)
+                .font(.bondiSubheadline.weight(isBold ? .semibold : .regular))
                 .foregroundStyle(Color.bondiNavy)
             Spacer()
             Text(value)
-                .fontWeight(isBold ? .semibold : .regular)
+                .font(isBold ? .bondiNumericSmall : .bondiSubheadline)
                 .foregroundStyle(isNegative ? .secondary : Color.bondiNavy)
         }
     }

@@ -10,17 +10,17 @@ struct BondCardView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(bond.name)
-                    .font(.headline)
+                    .font(.bondiTitle3)
                     .foregroundStyle(Color.bondiNavy)
 
                 Text("\(bond.yieldAnnual, specifier: "%.1f")% anual · \(bond.monthsToMaturity) meses")
-                    .font(.subheadline)
-                    .foregroundStyle(Color.bondiNavy.opacity(0.7)) // CHANGE THIS
+                    .font(.bondiSubheadline)
+                    .foregroundStyle(Color.bondiNavy.opacity(0.7))
 
                 HStack(spacing: 8) {
                     Text("Desde $\(Int(bond.minInvestmentUSD))")
-                        .font(.caption)
-                        .foregroundStyle(Color.bondiNavy.opacity(0.7)) // CHANGE THIS
+                        .font(.bondiCaption)
+                        .foregroundStyle(Color.bondiNavy.opacity(0.7))
                     RiskBadge(riskLevel: bond.riskLevel)
                 }
             }
@@ -57,10 +57,10 @@ struct RiskBadge: View {
         HStack(spacing: 4) {
             Text(dots)
                 .foregroundStyle(color)
-                .font(.caption2)
+                .font(.bondiCaption2)
             Text("Riesgo \(riskLevel.rawValue)")
                 .foregroundStyle(.secondary)
-                .font(.caption)
+                .font(.bondiCaption)
         }
     }
 }

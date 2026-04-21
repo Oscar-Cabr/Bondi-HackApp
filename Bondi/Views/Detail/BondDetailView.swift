@@ -26,33 +26,9 @@ struct BondDetailView: View {
                         Divider().opacity(0.5)
                         simulatorSection
 
-                        Button(action: { showInvestmentSheet = true }) {
-                            HStack(spacing: 8) {
-                                Text("Invertir ahora")
-                                    .font(.system(.headline, design: .rounded, weight: .semibold))
-                                Image(systemName: "arrow.up.circle.fill")
-                            }
-                            .foregroundStyle(Color.bondiNavy)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 18)
-                            .background(
-                                ZStack {
-                                    LinearGradient(
-                                        colors: [Color.bondiGreen, Color.bondiGreenLight],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                    LinearGradient(
-                                        colors: [.white.opacity(0.45), .clear],
-                                        startPoint: .top,
-                                        endPoint: .center
-                                    )
-                                }
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                            .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
-                        }
-                        .padding(.top, 12)
+                        Button("Invertir ahora") { showInvestmentSheet = true }
+                            .buttonStyle(BondiPrimaryButtonStyle(icon: "arrow.up.circle.fill"))
+                            .padding(.top, 12)
                     }
                     .padding()
                 }
@@ -94,10 +70,10 @@ struct BondDetailView: View {
                                 .font(.system(size: 36))
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(bond.name)
-                                    .font(.title3.bold())
+                                    .font(.bondiTitle3)
                                     .foregroundStyle(.white)
                                 Text(bond.country)
-                                    .font(.subheadline)
+                                    .font(.bondiSubheadline)
                                     .foregroundStyle(.white.opacity(0.85))
                             }
                         }
@@ -117,10 +93,10 @@ struct BondDetailView: View {
                         .font(.system(size: 52))
                     VStack(alignment: .leading, spacing: 4) {
                         Text(bond.name)
-                            .font(.title2.bold())
+                            .font(.bondiTitle2)
                             .foregroundStyle(Color.bondiNavy)
                         Text(bond.country)
-                            .font(.subheadline)
+                            .font(.bondiSubheadline)
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
@@ -159,9 +135,9 @@ struct BondDetailView: View {
                 .fill(
                     LinearGradient(
                         colors: [
-                            Color.bondiGreen.opacity(0.18),
-                            Color.bondiGreenLight.opacity(0.10),
-                            Color.white.opacity(0.6)
+                            Color.bondiGreen.opacity(0.22),
+                            Color.bondiCardLight.opacity(0.85),
+                            Color.bondiCardMedium.opacity(0.75)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -191,7 +167,7 @@ struct BondDetailView: View {
 
         case .failed:
             Text("No se pudo generar la explicación.")
-                .font(.callout)
+                .font(.bondiCallout)
                 .foregroundStyle(.secondary)
 
         case .streaming(let text):
@@ -213,7 +189,7 @@ struct BondDetailView: View {
         } label: {
             HStack(spacing: 8) {
                 Label("¿Qué significa esto?", systemImage: "sparkles")
-                    .font(.headline)
+                    .font(.bondiHeadline)
                     .foregroundStyle(Color.bondiNavy)
 
                 Spacer()
@@ -223,7 +199,7 @@ struct BondDetailView: View {
                         Image(systemName: "apple.intelligence")
                             .font(.caption2)
                         Text("Apple Intelligence")
-                            .font(.caption2.bold())
+                            .font(.bondiCaption2.weight(.bold))
                     }
                     .foregroundStyle(Color.bondiGreen)
                     .padding(.horizontal, 8)
@@ -233,7 +209,7 @@ struct BondDetailView: View {
                 }
 
                 Image(systemName: "chevron.down")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.bondiSubheadline.weight(.semibold))
                     .foregroundStyle(Color.bondiNavy.opacity(0.6))
                     .rotationEffect(.degrees(isAIExpanded ? 0 : -90))
             }
@@ -246,21 +222,27 @@ struct BondDetailView: View {
     private var simulatorSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Simulador")
-                .font(.headline)
+                .font(.bondiHeadline)
                 .foregroundStyle(Color.bondiNavy)
 
-            HStack(spacing: 6) {
+            HStack(spacing: 8) {
                 ForEach([5, 10, 25, 50, 100], id: \.self) { preset in
+                    let selected = investmentAmount == Double(preset)
                     Button("$\(preset)") {
                         investmentAmount = Double(preset)
                     }
-                    .font(.subheadline.weight(.semibold))
+                    .font(.bondiSubheadline.weight(.semibold))
+                    .foregroundStyle(selected ? Color.bondiSoftBackground : Color.bondiGreenLight)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
-                    .background(investmentAmount == Double(preset) ? Color.bondiNavy : Color.bondiCardLight)
-                    .foregroundStyle(investmentAmount == Double(preset) ? .white : Color.bondiNavy)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .shadow(color: Color.bondiNavy.opacity(0.04), radius: 4, y: 2)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(selected ? Color.bondiGreen : Color.bondiCardLight.opacity(0.55))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .stroke(selected ? Color.clear : Color.bondiGreen.opacity(0.3), lineWidth: 1)
+                    )
                 }
             }
 
@@ -271,14 +253,14 @@ struct BondDetailView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Si invierto $\(Int(investmentAmount))")
                         .foregroundStyle(.secondary)
-                        .font(.subheadline)
+                        .font(.bondiSubheadline)
                     Text("En \(bond.monthsToMaturity) meses recibiré:")
                         .foregroundStyle(.secondary)
-                        .font(.subheadline)
+                        .font(.bondiSubheadline)
                 }
                 Spacer()
                 Text("$\(projectedReturn, specifier: "%.2f")")
-                    .font(.title2.bold())
+                    .font(.bondiNumeric)
                     .foregroundStyle(Color.bondiGreen)
             }
             .padding()
@@ -300,7 +282,7 @@ private struct StreamingTextCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             (Text(text) + cursorText)
-                .font(.callout)
+                .font(.bondiCallout)
                 .foregroundStyle(Color.bondiNavy.opacity(0.85))
                 .fixedSize(horizontal: false, vertical: true)
                 .animation(.none, value: text)
@@ -337,10 +319,10 @@ private struct StatCard: View {
     var body: some View {
         VStack(spacing: 4) {
             Text(value)
-                .font(.headline)
+                .font(.bondiNumericSmall)
                 .foregroundStyle(Color.bondiNavy)
             Text(label)
-                .font(.caption)
+                .font(.bondiCaption)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)

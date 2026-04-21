@@ -52,16 +52,21 @@ struct PortfolioView: View {
                         } label: {
                             HStack(spacing: 5) {
                                 Image(systemName: "sparkles")
-                                    .font(.subheadline)
+                                    .font(.bondiSubheadline)
                                 Text("Análisis IA")
-                                    .font(.subheadline.bold())
+                                    .font(.bondiSubheadline.weight(.semibold))
                             }
-                            .foregroundStyle(Color.bondiGreen)
-                            .padding(.horizontal, 10)
+                            .foregroundStyle(Color.bondiGreenLight)
+                            .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Color.bondiCardLight)
-                            .clipShape(Capsule())
-                            .shadow(color: Color.bondiNavy.opacity(0.05), radius: 4, y: 2)
+                            .background(
+                                Capsule()
+                                    .fill(Color.bondiCardLight.opacity(0.6))
+                            )
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.bondiGreen.opacity(0.4), lineWidth: 1)
+                            )
                         }
 
                         UserButton()
@@ -123,41 +128,44 @@ struct PortfolioView: View {
     private var balanceCard: some View {
         VStack(spacing: 8) {
             Text("Patrimonio total")
-                .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.8))
+                .font(.bondiCaption.weight(.semibold))
+                .tracking(1.0)
+                .textCase(.uppercase)
+                .foregroundStyle(.white.opacity(0.7))
 
             Text(totalEquity, format: .currency(code: "USD"))
-                .font(.system(size: 44, weight: .heavy, design: .rounded))
+                .font(.bondiNumericLarge)
                 .foregroundStyle(.white)
+                .monospacedDigit()
 
             HStack(spacing: 4) {
                 Image(systemName: totalReturn >= 0 ? "arrow.up.right" : "arrow.down.right")
                 Text(totalReturn, format: .currency(code: "USD"))
                 Text("(\(totalReturnPercent, specifier: "%.2f")%)")
             }
-            .font(.subheadline.weight(.semibold))
+            .font(.bondiSubheadline.weight(.semibold))
             .foregroundStyle(totalReturn >= 0 ? Color.bondiGreen : Color.bondiRed)
 
             Divider()
-                .overlay(Color.white.opacity(0.15))
+                .overlay(Color.white.opacity(0.12))
                 .padding(.vertical, 4)
 
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("En bonos")
-                        .font(.caption)
+                        .font(.bondiCaption)
                         .foregroundStyle(.white.opacity(0.7))
                     Text(totalCurrent, format: .currency(code: "USD"))
-                        .font(.subheadline.bold())
+                        .font(.bondiNumericSmall)
                         .foregroundStyle(.white)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("Disponible")
-                        .font(.caption)
+                        .font(.bondiCaption)
                         .foregroundStyle(.white.opacity(0.7))
                     Text(cashBalanceUSD, format: .currency(code: "USD"))
-                        .font(.subheadline.bold())
+                        .font(.bondiNumericSmall)
                         .foregroundStyle(.white)
                 }
             }
@@ -166,13 +174,17 @@ struct PortfolioView: View {
         .padding(24)
         .background(
             LinearGradient(
-                colors: [Color.bondiNavy, Color(hex: "0F2844")],
+                colors: [Color.bondiCardMedium, Color.bondiSoftBackground],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         )
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: Color.bondiNavy.opacity(0.25), radius: 15, y: 8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.bondiGreen.opacity(0.25), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.35), radius: 18, y: 8)
     }
 }
 
@@ -181,7 +193,7 @@ private struct SectionHeader: View {
     let title: String
     var body: some View {
         Text(title)
-            .font(.headline)
+            .font(.bondiTitle3)
             .foregroundStyle(Color.bondiNavy)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal)
@@ -197,10 +209,10 @@ private struct InvestmentRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(record.bondName)
-                    .font(.subheadline.bold())
+                    .font(.bondiHeadline)
                     .foregroundStyle(Color.bondiNavy)
                 Text("Invertido: \(record.amountUSD, format: .currency(code: "USD"))")
-                    .font(.caption)
+                    .font(.bondiCaption)
                     .foregroundStyle(.secondary)
             }
 
@@ -208,11 +220,12 @@ private struct InvestmentRow: View {
 
             VStack(alignment: .trailing, spacing: 2) {
                 Text(record.currentValueUSD, format: .currency(code: "USD"))
-                    .font(.subheadline.bold())
+                    .font(.bondiNumericSmall)
                     .foregroundStyle(Color.bondiNavy)
                 HStack(spacing: 2) {
                     Image(systemName: "arrow.up.right").font(.caption2)
-                    Text("\(record.returnPercent, specifier: "%.2f")%").font(.caption)
+                    Text("\(record.returnPercent, specifier: "%.2f")%")
+                        .font(.bondiCaption.weight(.semibold))
                 }
                 .foregroundStyle(Color.bondiGreen)
             }
@@ -220,7 +233,7 @@ private struct InvestmentRow: View {
         .padding()
         .background(Color.bondiCardLight)
         .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: Color.bondiNavy.opacity(0.04), radius: 8, y: 3)
+        .shadow(color: Color.black.opacity(0.18), radius: 8, y: 3)
     }
 }
 
@@ -233,10 +246,10 @@ private struct MaturityRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(record.bondName)
-                    .font(.subheadline.bold())
+                    .font(.bondiHeadline)
                     .foregroundStyle(Color.bondiNavy)
                 Text(record.bondMaturityDate, style: .date)
-                    .font(.caption)
+                    .font(.bondiCaption)
                     .foregroundStyle(.secondary)
             }
 
@@ -244,16 +257,16 @@ private struct MaturityRow: View {
 
             VStack(alignment: .trailing, spacing: 2) {
                 Text(record.expectedReturnAtMaturity, format: .currency(code: "USD"))
-                    .font(.subheadline.weight(.semibold))
+                    .font(.bondiNumericSmall)
                     .foregroundStyle(Color.bondiGreen)
                 Text("\(record.monthsRemaining)m restantes")
-                    .font(.caption)
+                    .font(.bondiCaption)
                     .foregroundStyle(.secondary)
             }
         }
         .padding()
         .background(Color.bondiCardLight)
         .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: Color.bondiNavy.opacity(0.04), radius: 8, y: 3)
+        .shadow(color: Color.black.opacity(0.18), radius: 8, y: 3)
     }
 }

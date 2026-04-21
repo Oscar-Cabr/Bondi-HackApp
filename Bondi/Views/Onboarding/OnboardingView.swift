@@ -30,6 +30,7 @@ struct OnboardingView: View {
                 HStack {
                     Spacer()
                     Button("Saltar") { onComplete() }
+                        .font(.bondiSubheadline.weight(.medium))
                         .foregroundStyle(Color.bondiNavy.opacity(0.6))
                         .padding()
                 }
@@ -61,35 +62,14 @@ struct OnboardingView: View {
 
                 Spacer()
 
-                Button(action: {
+                Button(currentPage < slides.count - 1 ? "Siguiente" : "Comenzar") {
                     if currentPage < slides.count - 1 {
                         withAnimation { currentPage += 1 }
                     } else {
                         onComplete()
                     }
-                }) {
-                    Text(currentPage < slides.count - 1 ? "Siguiente" : "Comenzar")
-                        .font(.system(.headline, design: .rounded, weight: .semibold))
-                        .foregroundStyle(Color.bondiNavy)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(
-                            ZStack {
-                                LinearGradient(
-                                    colors: [Color.bondiGreen, Color.bondiGreenLight],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                                LinearGradient(
-                                    colors: [.white.opacity(0.45), .clear],
-                                    startPoint: .top,
-                                    endPoint: .center
-                                )
-                            }
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                        .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
                 }
+                .buttonStyle(BondiPrimaryButtonStyle(icon: currentPage < slides.count - 1 ? "arrow.right" : "checkmark"))
                 .padding(.horizontal, 24)
                 .padding(.bottom, 48)
             }
@@ -109,14 +89,16 @@ private struct OnboardingSlide: View {
                 .foregroundStyle(Color.bondiGreen)
 
             Text(title)
-                .font(.title.bold())
+                .font(.bondiTitle)
                 .foregroundStyle(Color.bondiNavy)
                 .multilineTextAlignment(.center)
+                .lineSpacing(2)
 
             Text(subtitle)
-                .font(.body)
+                .font(.bondiBody)
                 .foregroundStyle(Color.bondiNavy.opacity(0.7))
                 .multilineTextAlignment(.center)
+                .lineSpacing(3)
                 .padding(.horizontal, 32)
         }
         .padding()

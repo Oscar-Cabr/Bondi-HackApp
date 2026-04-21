@@ -101,15 +101,7 @@ private struct FilterChip: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Text(label)
-                .font(.subheadline.weight(.medium))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(isSelected ? Color.bondiNavy : Color.bondiCardLight)
-                .foregroundStyle(isSelected ? Color.bondiSoftBackground : Color.bondiNavy)
-                .clipShape(Capsule())
-                .shadow(color: Color.bondiNavy.opacity(0.05), radius: 5, y: 2)
-        }
+        Button(label, action: action)
+            .buttonStyle(BondiChipButtonStyle(isSelected: isSelected))
     }
 }

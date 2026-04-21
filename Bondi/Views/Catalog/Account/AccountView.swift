@@ -53,68 +53,50 @@ struct AccountView: View {
     private var balanceCard: some View {
         VStack(spacing: 8) {
             Text("Saldo disponible")
-                .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.8))
+                .font(.bondiCaption.weight(.semibold))
+                .tracking(1.0)
+                .textCase(.uppercase)
+                .foregroundStyle(.white.opacity(0.7))
 
             Text(0.0, format: .currency(code: "MXN"))
-                .font(.system(size: 44, weight: .heavy, design: .rounded))
+                .font(.bondiNumericLarge)
                 .foregroundStyle(.white)
+                .monospacedDigit()
 
             Text("≈ \(0.0, specifier: "%.2f") USD")
-                .font(.caption)
-                .foregroundStyle(.white.opacity(0.8))
+                .font(.bondiCaption)
+                .foregroundStyle(.white.opacity(0.75))
         }
         .frame(maxWidth: .infinity)
         .padding(24)
         .background(
             LinearGradient(
-                colors: [Color.bondiNavy, Color(hex: "0F2844")],
+                colors: [Color.bondiCardMedium, Color.bondiSoftBackground],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         )
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: Color.bondiNavy.opacity(0.25), radius: 15, y: 8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.bondiGreen.opacity(0.25), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.35), radius: 18, y: 8)
     }
 
     // MARK: - Add funds button
     private var addFundsButton: some View {
-        Button {
+        Button("Depositar saldo") {
             showAddFunds = true
-        } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.title3)
-                Text("Depositar saldo")
-                    .font(.system(.headline, design: .rounded, weight: .semibold))
-            }
-            .foregroundStyle(Color.bondiNavy)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 18)
-            .background(
-                ZStack {
-                    LinearGradient(
-                        colors: [Color.bondiGreen, Color.bondiGreenLight],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    LinearGradient(
-                        colors: [.white.opacity(0.45), .clear],
-                        startPoint: .top,
-                        endPoint: .center
-                    )
-                }
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
         }
+        .buttonStyle(BondiPrimaryButtonStyle(icon: "plus.circle.fill"))
     }
 
     // MARK: - Banking details section
     private var bankingDetailsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Datos bancarios")
-                .font(.headline)
+                .font(.bondiTitle3)
                 .foregroundStyle(Color.bondiNavy)
                 .padding(.bottom, 2)
 
@@ -172,7 +154,7 @@ struct AccountView: View {
                     .foregroundStyle(Color.bondiGreen)
                     .font(.title3)
                 Text("Infraestructura y seguridad")
-                    .font(.headline)
+                    .font(.bondiTitle3)
                     .foregroundStyle(Color.bondiNavy)
             }
 
@@ -222,12 +204,12 @@ private struct AddFundsSheet: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
                         Text("Transferí desde cualquier banco mexicano usando tu CLABE única.")
-                            .font(.subheadline)
+                            .font(.bondiSubheadline)
                             .foregroundStyle(Color.bondiNavy.opacity(0.7))
 
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Instrucciones SPEI")
-                                .font(.headline)
+                                .font(.bondiTitle3)
                                 .foregroundStyle(Color.bondiNavy)
 
                             InstructionStep(number: 1, text: "Abrí tu app bancaria o portal de banca en línea.")
@@ -243,7 +225,7 @@ private struct AddFundsSheet: View {
 
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Tu CLABE")
-                                .font(.headline)
+                                .font(.bondiTitle3)
                                 .foregroundStyle(Color.bondiNavy)
 
                             BankingDetailRow(
@@ -265,7 +247,7 @@ private struct AddFundsSheet: View {
                         .shadow(color: Color.bondiNavy.opacity(0.04), radius: 10, y: 4)
 
                         Text("Los depósitos via SPEI son procesados por Etherfuse y acreditados en tu cuenta Bondi en tiempo real.")
-                            .font(.caption)
+                            .font(.bondiCaption)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.leading)
                     }
@@ -277,7 +259,8 @@ private struct AddFundsSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Cerrar") { dismiss() }
-                        .foregroundStyle(Color.bondiNavy)
+                        .font(.bondiSubheadline.weight(.medium))
+                        .foregroundStyle(Color.bondiGreenLight)
                 }
             }
         }
@@ -301,10 +284,10 @@ private struct BankingDetailRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
-                    .font(.caption)
+                    .font(.bondiCaption)
                     .foregroundStyle(.secondary)
                 Text(value)
-                    .font(.subheadline.bold())
+                    .font(.bondiSubheadline.weight(.semibold))
                     .foregroundStyle(Color.bondiNavy)
             }
 
@@ -340,7 +323,7 @@ private struct BulletItem: View {
                 .frame(width: 22, alignment: .center)
                 .padding(.top, 1)
             Text(text)
-                .font(.subheadline)
+                .font(.bondiSubheadline)
                 .foregroundStyle(Color.bondiNavy)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -354,13 +337,13 @@ private struct InstructionStep: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Text("\(number)")
-                .font(.caption.bold())
-                .foregroundStyle(.white)
+                .font(.bondiCaption.weight(.bold))
+                .foregroundStyle(Color.bondiSoftBackground)
                 .frame(width: 22, height: 22)
-                .background(Color.bondiNavy)
+                .background(Color.bondiGreen)
                 .clipShape(Circle())
             Text(text)
-                .font(.subheadline)
+                .font(.bondiSubheadline)
                 .foregroundStyle(Color.bondiNavy)
                 .fixedSize(horizontal: false, vertical: true)
         }
