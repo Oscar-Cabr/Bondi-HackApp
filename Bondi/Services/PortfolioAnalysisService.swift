@@ -351,7 +351,7 @@ final class PortfolioAnalysisService {
             "que bonos hay", "que bonos existen", "bonos disponibles",
             "catalogo", "catalog", "mostrame bonos", "que ofrecen"
         ]) {
-            return "En el catálogo de Bondi hay bonos soberanos de varios países de Latinoamérica (México, Chile, Brasil, Colombia, Perú, entre otros). Cada uno tiene su propio rendimiento, plazo y nivel de riesgo. Revisalos desde la pestaña de Catálogo."
+            return "En el catálogo de Bondi hay bonos soberanos de Latinoamérica (México, Chile, Brasil, Colombia, Perú) y de mercados desarrollados (Estados Unidos, Reino Unido, Corea del Sur). Cada uno tiene su propio rendimiento, plazo y nivel de riesgo. Revisalos desde la pestaña de Catálogo."
         }
 
         if matches(lowered, any: [

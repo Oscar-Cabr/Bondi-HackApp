@@ -57,6 +57,39 @@ enum MockData {
             riskLevel: .low,
             issuerDescription: "Bonos soberanos del Ministerio de Economía y Finanzas del Perú."
         ),
+        Bond(
+            id: "US-TNOTE-24M",
+            name: "T-Note USA",
+            country: "Estados Unidos",
+            countryFlag: "🇺🇸",
+            yieldAnnual: 4.3,
+            maturityDate: Calendar.current.date(byAdding: .month, value: 24, to: .now)!,
+            minInvestmentUSD: 5,
+            riskLevel: .low,
+            issuerDescription: "Treasury Note del Departamento del Tesoro de Estados Unidos, considerado uno de los activos más seguros del mundo."
+        ),
+        Bond(
+            id: "UK-GILT-36M",
+            name: "Gilt UK",
+            country: "Reino Unido",
+            countryFlag: "🇬🇧",
+            yieldAnnual: 4.6,
+            maturityDate: Calendar.current.date(byAdding: .month, value: 36, to: .now)!,
+            minInvestmentUSD: 5,
+            riskLevel: .low,
+            issuerDescription: "Gilt emitido por HM Treasury del Reino Unido, deuda soberana respaldada por el gobierno británico."
+        ),
+        Bond(
+            id: "KR-KTB-30M",
+            name: "KTB Corea",
+            country: "Corea del Sur",
+            countryFlag: "🇰🇷",
+            yieldAnnual: 5.2,
+            maturityDate: Calendar.current.date(byAdding: .month, value: 30, to: .now)!,
+            minInvestmentUSD: 5,
+            riskLevel: .low,
+            issuerDescription: "Korea Treasury Bond emitido por el Ministerio de Economía y Finanzas de Corea del Sur."
+        ),
     ]
 
     static let investments: [Investment] = [
