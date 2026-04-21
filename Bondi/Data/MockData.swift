@@ -11,7 +11,8 @@ enum MockData {
             maturityDate: Calendar.current.date(byAdding: .month, value: 18, to: .now)!,
             minInvestmentUSD: 5,
             riskLevel: .low,
-            issuerDescription: "Certificados de la Tesorería de la Federación, el instrumento de deuda del gobierno federal mexicano."
+            issuerDescription: "Certificados de la Tesorería de la Federación, el instrumento de deuda del gobierno federal mexicano.",
+            heroImageName: "bond-hero-mx-cetes"
         ),
         Bond(
             id: "CL-BCT-12M",
@@ -33,7 +34,8 @@ enum MockData {
             maturityDate: Calendar.current.date(byAdding: .month, value: 24, to: .now)!,
             minInvestmentUSD: 5,
             riskLevel: .medium,
-            issuerDescription: "Nota del Tesoro Nacional de Brasil, indexada a la inflación (IPCA)."
+            issuerDescription: "Nota del Tesoro Nacional de Brasil, indexada a la inflación (IPCA).",
+            heroImageName: "bond-hero-br-ntnb"
         ),
         Bond(
             id: "CO-TES-20M",
@@ -44,7 +46,8 @@ enum MockData {
             maturityDate: Calendar.current.date(byAdding: .month, value: 20, to: .now)!,
             minInvestmentUSD: 5,
             riskLevel: .medium,
-            issuerDescription: "Títulos de Tesorería del gobierno colombiano, denominados en pesos."
+            issuerDescription: "Títulos de Tesorería del gobierno colombiano, denominados en pesos.",
+            heroImageName: "bond-hero-co-tes"
         ),
         Bond(
             id: "PE-SOB-15M",
@@ -66,7 +69,8 @@ enum MockData {
             maturityDate: Calendar.current.date(byAdding: .month, value: 24, to: .now)!,
             minInvestmentUSD: 5,
             riskLevel: .low,
-            issuerDescription: "Treasury Note del Departamento del Tesoro de Estados Unidos, considerado uno de los activos más seguros del mundo."
+            issuerDescription: "Treasury Note del Departamento del Tesoro de Estados Unidos, considerado uno de los activos más seguros del mundo.",
+            heroImageName: "bond-hero-us-tnote"
         ),
         Bond(
             id: "UK-GILT-36M",
@@ -77,7 +81,8 @@ enum MockData {
             maturityDate: Calendar.current.date(byAdding: .month, value: 36, to: .now)!,
             minInvestmentUSD: 5,
             riskLevel: .low,
-            issuerDescription: "Gilt emitido por HM Treasury del Reino Unido, deuda soberana respaldada por el gobierno británico."
+            issuerDescription: "Gilt emitido por HM Treasury del Reino Unido, deuda soberana respaldada por el gobierno británico.",
+            heroImageName: "bond-hero-uk-gilt"
         ),
         Bond(
             id: "KR-KTB-30M",
@@ -88,7 +93,8 @@ enum MockData {
             maturityDate: Calendar.current.date(byAdding: .month, value: 30, to: .now)!,
             minInvestmentUSD: 5,
             riskLevel: .low,
-            issuerDescription: "Korea Treasury Bond emitido por el Ministerio de Economía y Finanzas de Corea del Sur."
+            issuerDescription: "Korea Treasury Bond emitido por el Ministerio de Economía y Finanzas de Corea del Sur.",
+            heroImageName: "bond-hero-kr-ktb"
         ),
     ]
 

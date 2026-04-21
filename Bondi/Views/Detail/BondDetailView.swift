@@ -16,44 +16,48 @@ struct BondDetailView: View {
             Color.bondiSoftBackground.ignoresSafeArea()
             
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 0) {
                     bondHeader
-                    statsRow
-                    Divider().opacity(0.5)
-                    aiExplanationSection
-                    Divider().opacity(0.5)
-                    simulatorSection
 
-                    Button(action: { showInvestmentSheet = true }) {
-                        HStack(spacing: 8) {
-                            Text("Invertir ahora")
-                                .font(.system(.headline, design: .rounded, weight: .semibold))
-                            Image(systemName: "arrow.up.circle.fill")
-                        }
-                        .foregroundStyle(Color.bondiNavy)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(
-                            ZStack {
-                                LinearGradient(
-                                    colors: [Color.bondiGreen, Color.bondiGreenLight],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                                LinearGradient(
-                                    colors: [.white.opacity(0.45), .clear],
-                                    startPoint: .top,
-                                    endPoint: .center
-                                )
+                    VStack(alignment: .leading, spacing: 20) {
+                        statsRow
+                        Divider().opacity(0.5)
+                        aiExplanationSection
+                        Divider().opacity(0.5)
+                        simulatorSection
+
+                        Button(action: { showInvestmentSheet = true }) {
+                            HStack(spacing: 8) {
+                                Text("Invertir ahora")
+                                    .font(.system(.headline, design: .rounded, weight: .semibold))
+                                Image(systemName: "arrow.up.circle.fill")
                             }
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                        .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
+                            .foregroundStyle(Color.bondiNavy)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 18)
+                            .background(
+                                ZStack {
+                                    LinearGradient(
+                                        colors: [Color.bondiGreen, Color.bondiGreenLight],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                    LinearGradient(
+                                        colors: [.white.opacity(0.45), .clear],
+                                        startPoint: .top,
+                                        endPoint: .center
+                                    )
+                                }
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
+                        }
+                        .padding(.top, 12)
                     }
-                    .padding(.top, 12)
+                    .padding()
                 }
-                .padding()
             }
+            .ignoresSafeArea(edges: .top)
         }
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showInvestmentSheet) {
@@ -69,18 +73,54 @@ struct BondDetailView: View {
 
     // MARK: - Header
     private var bondHeader: some View {
-        HStack(spacing: 16) {
-            Text(bond.countryFlag)
-                .font(.system(size: 52))
-            VStack(alignment: .leading, spacing: 4) {
-                Text(bond.name)
-                    .font(.title2.bold())
-                    .foregroundStyle(Color.bondiNavy)
-                Text(bond.country)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+        Group {
+            if let imageName = bond.heroImageName,
+               let uiImage = UIImage(named: imageName) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: .infinity, alignment: .bottom)
+                    .frame(height: 280, alignment: .bottom)
+                    .clipped()
+                    .overlay(alignment: .bottomLeading) {
+                        HStack(spacing: 10) {
+                            Text(bond.countryFlag)
+                                .font(.system(size: 36))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(bond.name)
+                                    .font(.title3.bold())
+                                    .foregroundStyle(.white)
+                                Text(bond.country)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.white.opacity(0.85))
+                            }
+                        }
+                        .padding(14)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(
+                            LinearGradient(
+                                colors: [.black.opacity(0.7), .clear],
+                                startPoint: .bottom,
+                                endPoint: .top
+                            )
+                        )
+                    }
+            } else {
+                HStack(spacing: 16) {
+                    Text(bond.countryFlag)
+                        .font(.system(size: 52))
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(bond.name)
+                            .font(.title2.bold())
+                            .foregroundStyle(Color.bondiNavy)
+                        Text(bond.country)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                .padding()
             }
-            Spacer()
         }
     }
 

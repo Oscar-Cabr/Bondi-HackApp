@@ -10,6 +10,7 @@ struct Bond: Identifiable, Hashable {
     let minInvestmentUSD: Double
     let riskLevel: RiskLevel
     let issuerDescription: String
+    var heroImageName: String? = nil
 
     enum RiskLevel: String, CaseIterable, Hashable {
         case low = "Bajo"
