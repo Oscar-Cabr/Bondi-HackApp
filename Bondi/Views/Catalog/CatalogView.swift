@@ -23,59 +23,63 @@ struct CatalogView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    // Country filter
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            FilterChip(label: "Todos", isSelected: selectedCountry == nil) {
-                                selectedCountry = nil
-                            }
-                            ForEach(countries, id: \.self) { country in
-                                FilterChip(label: country, isSelected: selectedCountry == country) {
-                                    selectedCountry = selectedCountry == country ? nil : country
+            ZStack {
+                Color.bondiSoftBackground.ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Country filter
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                FilterChip(label: "Todos", isSelected: selectedCountry == nil) {
+                                    selectedCountry = nil
+                                }
+                                ForEach(countries, id: \.self) { country in
+                                    FilterChip(label: country, isSelected: selectedCountry == country) {
+                                        selectedCountry = selectedCountry == country ? nil : country
+                                    }
                                 }
                             }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
-                    }
 
-                    // Risk filter
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            FilterChip(label: "Todo riesgo", isSelected: selectedRisk == nil) {
-                                selectedRisk = nil
-                            }
-                            ForEach(Bond.RiskLevel.allCases, id: \.self) { risk in
-                                FilterChip(label: "Riesgo \(risk.rawValue)", isSelected: selectedRisk == risk) {
-                                    selectedRisk = selectedRisk == risk ? nil : risk
+                        // Risk filter
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                FilterChip(label: "Todo riesgo", isSelected: selectedRisk == nil) {
+                                    selectedRisk = nil
+                                }
+                                ForEach(Bond.RiskLevel.allCases, id: \.self) { risk in
+                                    FilterChip(label: "Riesgo \(risk.rawValue)", isSelected: selectedRisk == risk) {
+                                        selectedRisk = selectedRisk == risk ? nil : risk
+                                    }
                                 }
                             }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
-                    }
 
-                    if filteredBonds.isEmpty {
-                        ContentUnavailableView(
-                            "Sin resultados",
-                            systemImage: "doc.text.magnifyingglass",
-                            description: Text("Prueba cambiando los filtros")
-                        )
-                        .padding(.top, 40)
-                        .frame(maxWidth: .infinity)
-                    } else {
-                        LazyVStack(spacing: 12) {
-                            ForEach(filteredBonds) { bond in
-                                NavigationLink(destination: BondDetailView(bond: bond)) {
-                                    BondCardView(bond: bond)
+                        if filteredBonds.isEmpty {
+                            ContentUnavailableView(
+                                "Sin resultados",
+                                systemImage: "doc.text.magnifyingglass",
+                                description: Text("Prueba cambiando los filtros")
+                            )
+                            .padding(.top, 40)
+                            .frame(maxWidth: .infinity)
+                        } else {
+                            LazyVStack(spacing: 12) {
+                                ForEach(filteredBonds) { bond in
+                                    NavigationLink(destination: BondDetailView(bond: bond)) {
+                                        BondCardView(bond: bond)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
                             }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
                     }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
             }
             .navigationTitle("Bondi")
             .navigationBarTitleDisplayMode(.large)
@@ -87,6 +91,7 @@ struct CatalogView: View {
                 }
             }
         }
+    .preferredColorScheme(.dark)
     }
 }
 
@@ -98,12 +103,13 @@ private struct FilterChip: View {
     var body: some View {
         Button(action: action) {
             Text(label)
-                .font(.subheadline)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 7)
-                .background(isSelected ? Color.bondiNavy : Color.bondiCard)
-                .foregroundStyle(isSelected ? .white : .primary)
+                .font(.subheadline.weight(.medium))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(isSelected ? Color.bondiNavy : Color.bondiCardLight)
+                .foregroundStyle(isSelected ? Color.bondiSoftBackground : Color.bondiNavy)
                 .clipShape(Capsule())
+                .shadow(color: Color.bondiNavy.opacity(0.05), radius: 5, y: 2)
         }
     }
 }

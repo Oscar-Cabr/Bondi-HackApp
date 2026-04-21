@@ -10,11 +10,15 @@ struct PortfolioAnalysisView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                messageList
-                Divider()
-                suggestionChips
-                inputBar
+            ZStack {
+                Color.bondiSoftBackground.ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    messageList
+                    Divider().opacity(0.5)
+                    suggestionChips
+                    inputBar
+                }
             }
             .navigationTitle("Análisis IA")
             .navigationBarTitleDisplayMode(.inline)
@@ -34,7 +38,6 @@ struct PortfolioAnalysisView: View {
     }
 
     // MARK: - Header badge
-
     private var intelligenceBadge: some View {
         HStack(spacing: 5) {
             Image(systemName: "apple.intelligence")
@@ -45,12 +48,12 @@ struct PortfolioAnalysisView: View {
         .foregroundStyle(Color.bondiGreen)
         .padding(.horizontal, 9)
         .padding(.vertical, 5)
-        .background(Color.bondiGreen.opacity(0.12))
+        .background(Color.bondiCardLight)
         .clipShape(Capsule())
+        .shadow(color: Color.bondiNavy.opacity(0.05), radius: 4, y: 2)
     }
 
     // MARK: - Message list
-
     private var messageList: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -87,7 +90,6 @@ struct PortfolioAnalysisView: View {
     }
 
     // MARK: - Suggestion chips
-
     @ViewBuilder
     private var suggestionChips: some View {
         let suggestions = service.suggestedPrompts
@@ -123,7 +125,6 @@ struct PortfolioAnalysisView: View {
     }
 
     // MARK: - Input bar
-
     private var inputBar: some View {
         HStack(spacing: 10) {
             TextField("Preguntá sobre tu portafolio…", text: $service.inputText, axis: .vertical)
@@ -131,21 +132,22 @@ struct PortfolioAnalysisView: View {
                 .font(.callout)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(Color(.secondarySystemBackground))
+                .background(Color.bondiCardLight)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
+                .shadow(color: Color.bondiNavy.opacity(0.03), radius: 5, y: -2)
                 .onSubmit { sendMessage() }
 
             Button(action: sendMessage) {
                 Image(systemName: service.isLoading ? "ellipsis" : "arrow.up.circle.fill")
                     .font(.system(size: 30))
-                    .foregroundStyle(canSend ? Color.bondiGreen : Color(.tertiaryLabel))
+                    .foregroundStyle(canSend ? Color.bondiGreen : Color.bondiNavy.opacity(0.2))
                     .symbolEffect(.pulse, isActive: service.isLoading)
             }
             .disabled(!canSend)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(.regularMaterial)
+        .background(Color.bondiSoftBackground)
     }
 
     private var canSend: Bool {
@@ -159,7 +161,6 @@ struct PortfolioAnalysisView: View {
 }
 
 // MARK: - Message Bubble
-
 private struct MessageBubble: View {
     let message: PortfolioAnalysisService.ChatMessage
 
@@ -172,8 +173,9 @@ private struct MessageBubble: View {
             if !isUser {
                 ZStack {
                     Circle()
-                        .fill(Color.bondiNavy)
+                        .fill(Color.bondiCardLight)
                         .frame(width: 28, height: 28)
+                        .shadow(color: Color.bondiNavy.opacity(0.05), radius: 4, y: 2)
                     Image(systemName: "sparkles")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(Color.bondiGreen)
@@ -186,13 +188,14 @@ private struct MessageBubble: View {
 
             if isUser {
                 Circle()
-                    .fill(Color(.tertiarySystemFill))
+                    .fill(Color.bondiCardLight)
                     .frame(width: 28, height: 28)
                     .overlay(
                         Image(systemName: "person.fill")
                             .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.bondiNavy.opacity(0.6))
                     )
+                    .shadow(color: Color.bondiNavy.opacity(0.05), radius: 4, y: 2)
             } else {
                 Spacer(minLength: 56)
             }
@@ -205,17 +208,18 @@ private struct MessageBubble: View {
             TypingIndicator()
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(Color(.secondarySystemBackground))
+                .background(Color.bondiCardLight)
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .shadow(color: Color.bondiNavy.opacity(0.03), radius: 4, y: 2)
+
         } else if message.isStreaming {
-            // Blinking cursor driven by time → zero animation state to leak.
             TimelineView(.periodic(from: .now, by: 0.5)) { context in
                 let tick = Int(context.date.timeIntervalSinceReferenceDate * 2)
                 let on = tick % 2 == 0
                 styledText(cursor: on ? Text(" ▋").foregroundColor(Color.bondiGreen) : Text(""))
             }
+
         } else {
-            // Finalised message — no cursor, no ticking view.
             styledText(cursor: Text(""))
         }
     }
@@ -231,8 +235,7 @@ private struct MessageBubble: View {
     }
 }
 
-// MARK: - Typing Indicator (3 bouncing dots)
-
+// MARK: - Typing Indicator
 private struct TypingIndicator: View {
     @State private var animating = false
 
@@ -240,7 +243,7 @@ private struct TypingIndicator: View {
         HStack(spacing: 4) {
             ForEach(0..<3, id: \.self) { i in
                 Circle()
-                    .fill(Color.bondiNavy.opacity(0.5))
+                    .fill(Color.bondiNavy.opacity(0.4))
                     .frame(width: 7, height: 7)
                     .offset(y: animating ? -4 : 0)
                     .animation(

@@ -31,11 +31,15 @@ struct PortfolioView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if investments.isEmpty {
-                    emptyState
-                } else {
-                    portfolioContent
+            ZStack {
+                Color.bondiSoftBackground.ignoresSafeArea()
+                
+                Group {
+                    if investments.isEmpty {
+                        emptyState
+                    } else {
+                        portfolioContent
+                    }
                 }
             }
             .navigationTitle(greeting)
@@ -55,8 +59,9 @@ struct PortfolioView: View {
                             .foregroundStyle(Color.bondiGreen)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
-                            .background(Color.bondiGreen.opacity(0.12))
+                            .background(Color.bondiCardLight)
                             .clipShape(Capsule())
+                            .shadow(color: Color.bondiNavy.opacity(0.05), radius: 4, y: 2)
                         }
 
                         UserButton()
@@ -71,20 +76,21 @@ struct PortfolioView: View {
                 )
             }
         }
+        .preferredColorScheme(.dark)
     }
 
     // MARK: Empty state
-
     private var emptyState: some View {
         ContentUnavailableView {
             Label("Sin inversiones aún", systemImage: "chart.pie")
+                .foregroundStyle(Color.bondiNavy)
         } description: {
             Text("Explorá el catálogo y realizá tu primera inversión desde $5.")
+                .foregroundStyle(Color.bondiNavy.opacity(0.7))
         }
     }
 
     // MARK: Portfolio content
-
     private var portfolioContent: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -114,7 +120,6 @@ struct PortfolioView: View {
     }
 
     // MARK: Balance card
-
     private var balanceCard: some View {
         VStack(spacing: 8) {
             Text("Patrimonio total")
@@ -122,7 +127,7 @@ struct PortfolioView: View {
                 .foregroundStyle(.white.opacity(0.8))
 
             Text(totalEquity, format: .currency(code: "USD"))
-                .font(.system(size: 44, weight: .bold))
+                .font(.system(size: 44, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
 
             HStack(spacing: 4) {
@@ -130,7 +135,7 @@ struct PortfolioView: View {
                 Text(totalReturn, format: .currency(code: "USD"))
                 Text("(\(totalReturnPercent, specifier: "%.2f")%)")
             }
-            .font(.subheadline)
+            .font(.subheadline.weight(.semibold))
             .foregroundStyle(totalReturn >= 0 ? Color.bondiGreen : Color.bondiRed)
 
             Divider()
@@ -159,18 +164,25 @@ struct PortfolioView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(24)
-        .background(Color.bondiNavy)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .background(
+            LinearGradient(
+                colors: [Color.bondiNavy, Color(hex: "0F2844")],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: Color.bondiNavy.opacity(0.25), radius: 15, y: 8)
     }
 }
 
 // MARK: - Subviews
-
 private struct SectionHeader: View {
     let title: String
     var body: some View {
         Text(title)
             .font(.headline)
+            .foregroundStyle(Color.bondiNavy)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal)
     }
@@ -184,7 +196,9 @@ private struct InvestmentRow: View {
             Text(record.bondCountryFlag).font(.title2)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(record.bondName).font(.subheadline.bold())
+                Text(record.bondName)
+                    .font(.subheadline.bold())
+                    .foregroundStyle(Color.bondiNavy)
                 Text("Invertido: \(record.amountUSD, format: .currency(code: "USD"))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -195,6 +209,7 @@ private struct InvestmentRow: View {
             VStack(alignment: .trailing, spacing: 2) {
                 Text(record.currentValueUSD, format: .currency(code: "USD"))
                     .font(.subheadline.bold())
+                    .foregroundStyle(Color.bondiNavy)
                 HStack(spacing: 2) {
                     Image(systemName: "arrow.up.right").font(.caption2)
                     Text("\(record.returnPercent, specifier: "%.2f")%").font(.caption)
@@ -203,8 +218,9 @@ private struct InvestmentRow: View {
             }
         }
         .padding()
-        .background(Color.bondiCard)
+        .background(Color.bondiCardLight)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.bondiNavy.opacity(0.04), radius: 8, y: 3)
     }
 }
 
@@ -216,7 +232,9 @@ private struct MaturityRow: View {
             Text(record.bondCountryFlag).font(.title3)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(record.bondName).font(.subheadline.bold())
+                Text(record.bondName)
+                    .font(.subheadline.bold())
+                    .foregroundStyle(Color.bondiNavy)
                 Text(record.bondMaturityDate, style: .date)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -226,7 +244,7 @@ private struct MaturityRow: View {
 
             VStack(alignment: .trailing, spacing: 2) {
                 Text(record.expectedReturnAtMaturity, format: .currency(code: "USD"))
-                    .font(.subheadline)
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color.bondiGreen)
                 Text("\(record.monthsRemaining)m restantes")
                     .font(.caption)
@@ -234,7 +252,8 @@ private struct MaturityRow: View {
             }
         }
         .padding()
-        .background(Color.bondiCard)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .background(Color.bondiCardLight)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.bondiNavy.opacity(0.04), radius: 8, y: 3)
     }
 }

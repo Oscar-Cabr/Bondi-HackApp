@@ -173,7 +173,7 @@ struct LandingView: View {
                 .background(
                     ZStack {
                         LinearGradient(
-                            colors: [Color.bondiGreen, Color(hex: "86EFAC")],
+                            colors: [Color.bondiGreen, Color.bondiGreenLight],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -238,9 +238,9 @@ private struct BondHeroCard: View {
                     .fill(
                         LinearGradient(
                             colors: [
-                                Color(hex: "0F2844"),
-                                Color(hex: "1A3A5C"),
-                                Color(hex: "24527F")
+                                Color.bondiCardDark,
+                                Color.bondiNavy,
+                                Color.bondiCardMedium
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -451,7 +451,7 @@ private struct AnimatedMeshBackground: View {
             let c = CGFloat(sin(t * 0.22 + 1.2) * 0.5 + 0.5)
 
             ZStack {
-                Color(hex: "0A1B30")
+                Color.bondiMeshBase
 
                 meshOrFallback(a: a, b: b, c: c)
 
@@ -464,7 +464,7 @@ private struct AnimatedMeshBackground: View {
                 )
 
                 glow(
-                    color: Color(hex: "3B82F6").opacity(0.25),
+                    color: Color.bondiBlueLight.opacity(0.25),
                     size: 320,
                     blur: 100,
                     offsetX: 160 - 30 * c,
@@ -493,14 +493,14 @@ private struct AnimatedMeshBackground: View {
                 SIMD2<Float>(1.0, 1.0)
             ]
             let colors: [Color] = [
-                Color(hex: "0A1B30"), Color(hex: "11294A"), Color(hex: "0A1B30"),
-                Color(hex: "1A3A5C"), Color(hex: "2A6B8A").opacity(0.9), Color(hex: "1A3A5C"),
-                Color(hex: "0A1B30"), Color(hex: "0F2844"), Color(hex: "12355A")
+                Color.bondiMeshBase, Color.bondiMeshDark1, Color.bondiMeshBase,
+                Color.bondiNavy, Color.bondiMeshDark2.opacity(0.9), Color.bondiNavy,
+                Color.bondiMeshBase, Color.bondiCardDark, Color.bondiMeshDark3
             ]
             MeshGradient(width: 3, height: 3, points: points, colors: colors)
         } else {
             LinearGradient(
-                colors: [Color(hex: "0A1B30"), Color(hex: "1A3A5C")],
+                colors: [Color.bondiMeshBase, Color.bondiNavy],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -534,7 +534,7 @@ private struct FloatingCoins: View {
         Coin(x: 0.22, size: 18, duration: 18, delay: 3, symbol: "percent", tint: .white.opacity(0.7)),
         Coin(x: 0.78, size: 22, duration: 16, delay: 1.5, symbol: "chart.line.uptrend.xyaxis", tint: .bondiGreen),
         Coin(x: 0.9, size: 26, duration: 20, delay: 5, symbol: "dollarsign.circle.fill", tint: .white.opacity(0.6)),
-        Coin(x: 0.5, size: 16, duration: 22, delay: 2, symbol: "sparkle", tint: Color(hex: "86EFAC"))
+        Coin(x: 0.5, size: 16, duration: 22, delay: 2, symbol: "sparkle", tint: Color.bondiGreenLight)
     ]
 
     var body: some View {

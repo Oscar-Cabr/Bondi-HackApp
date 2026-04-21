@@ -12,23 +12,27 @@ struct AccountView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    balanceCard
-                        .padding(.horizontal)
+            ZStack {
+                Color.bondiSoftBackgroundDarker.ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 20) {
+                        balanceCard
+                            .padding(.horizontal)
 
-                    addFundsButton
-                        .padding(.horizontal)
+                        addFundsButton
+                            .padding(.horizontal)
 
-                    bankingDetailsSection
-                        .padding(.horizontal)
+                        bankingDetailsSection
+                            .padding(.horizontal)
 
-                    poweredBySection
-                        .padding(.horizontal)
+                        poweredBySection
+                            .padding(.horizontal)
 
-                    Spacer(minLength: 32)
+                        Spacer(minLength: 32)
+                    }
+                    .padding(.top)
                 }
-                .padding(.top)
             }
             .navigationTitle("Mi cuenta")
             .navigationBarTitleDisplayMode(.large)
@@ -42,10 +46,10 @@ struct AccountView: View {
                 AddFundsSheet()
             }
         }
+        .preferredColorScheme(.dark)
     }
 
     // MARK: - Balance card
-
     private var balanceCard: some View {
         VStack(spacing: 8) {
             Text("Saldo disponible")
@@ -53,21 +57,27 @@ struct AccountView: View {
                 .foregroundStyle(.white.opacity(0.8))
 
             Text(0.0, format: .currency(code: "MXN"))
-                .font(.system(size: 44, weight: .bold))
+                .font(.system(size: 44, weight: .heavy, design: .rounded))
                 .foregroundStyle(.white)
 
             Text("≈ \(0.0, specifier: "%.2f") USD")
                 .font(.caption)
-                .foregroundStyle(.white.opacity(0.6))
+                .foregroundStyle(.white.opacity(0.8))
         }
         .frame(maxWidth: .infinity)
         .padding(24)
-        .background(Color.bondiNavy)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .background(
+            LinearGradient(
+                colors: [Color.bondiNavy, Color(hex: "0F2844")],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: Color.bondiNavy.opacity(0.25), radius: 15, y: 8)
     }
 
     // MARK: - Add funds button
-
     private var addFundsButton: some View {
         Button {
             showAddFunds = true
@@ -76,22 +86,36 @@ struct AccountView: View {
                 Image(systemName: "plus.circle.fill")
                     .font(.title3)
                 Text("Depositar saldo")
-                    .font(.headline)
+                    .font(.system(.headline, design: .rounded, weight: .semibold))
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.bondiNavy)
             .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.bondiGreen)
-            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .padding(.vertical, 18)
+            .background(
+                ZStack {
+                    LinearGradient(
+                        colors: [Color.bondiGreen, Color.bondiGreenLight],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    LinearGradient(
+                        colors: [.white.opacity(0.45), .clear],
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                }
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
         }
     }
 
     // MARK: - Banking details section
-
     private var bankingDetailsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Datos bancarios")
                 .font(.headline)
+                .foregroundStyle(Color.bondiNavy)
                 .padding(.bottom, 2)
 
             BankingDetailRow(
@@ -100,7 +124,7 @@ struct AccountView: View {
                 value: "STP (Sistema de Transferencias y Pagos)"
             )
 
-            Divider()
+            Divider().opacity(0.5)
 
             BankingDetailRow(
                 icon: "arrow.left.arrow.right",
@@ -108,7 +132,7 @@ struct AccountView: View {
                 value: "SPEI"
             )
 
-            Divider()
+            Divider().opacity(0.5)
 
             BankingDetailRow(
                 icon: "number.square.fill",
@@ -117,7 +141,7 @@ struct AccountView: View {
                 copyable: true
             )
 
-            Divider()
+            Divider().opacity(0.5)
 
             BankingDetailRow(
                 icon: "globe",
@@ -126,7 +150,7 @@ struct AccountView: View {
                 copyable: true
             )
 
-            Divider()
+            Divider().opacity(0.5)
 
             BankingDetailRow(
                 icon: "person.fill",
@@ -135,12 +159,12 @@ struct AccountView: View {
             )
         }
         .padding()
-        .background(Color.bondiCard)
+        .background(Color.bondiCardLight)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.bondiNavy.opacity(0.04), radius: 10, y: 4)
     }
 
     // MARK: - Powered by section
-
     private var poweredBySection: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
@@ -149,6 +173,7 @@ struct AccountView: View {
                     .font(.title3)
                 Text("Infraestructura y seguridad")
                     .font(.headline)
+                    .foregroundStyle(Color.bondiNavy)
             }
 
             VStack(alignment: .leading, spacing: 10) {
@@ -179,65 +204,73 @@ struct AccountView: View {
             }
         }
         .padding()
-        .background(Color.bondiCard)
+        .background(Color.bondiCardLight)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .shadow(color: Color.bondiNavy.opacity(0.04), radius: 10, y: 4)
     }
 }
 
 // MARK: - Add Funds Sheet
-
 private struct AddFundsSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("Transferí desde cualquier banco mexicano usando tu CLABE única.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+            ZStack {
+                Color.bondiSoftBackgroundDarker.ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        Text("Transferí desde cualquier banco mexicano usando tu CLABE única.")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.bondiNavy.opacity(0.7))
 
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Instrucciones SPEI")
-                            .font(.headline)
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Instrucciones SPEI")
+                                .font(.headline)
+                                .foregroundStyle(Color.bondiNavy)
 
-                        InstructionStep(number: 1, text: "Abrí tu app bancaria o portal de banca en línea.")
-                        InstructionStep(number: 2, text: "Seleccioná \"Transferencia SPEI\" o \"Pago a terceros\".")
-                        InstructionStep(number: 3, text: "Ingresá la CLABE interbancaria de tu cuenta Bondi.")
-                        InstructionStep(number: 4, text: "Elegí el monto a depositar (mínimo $100 MXN).")
-                        InstructionStep(number: 5, text: "Confirmá la transferencia. El saldo se refleja en segundos.")
+                            InstructionStep(number: 1, text: "Abrí tu app bancaria o portal de banca en línea.")
+                            InstructionStep(number: 2, text: "Seleccioná \"Transferencia SPEI\" o \"Pago a terceros\".")
+                            InstructionStep(number: 3, text: "Ingresá la CLABE interbancaria de tu cuenta Bondi.")
+                            InstructionStep(number: 4, text: "Elegí el monto a depositar (mínimo $100 MXN).")
+                            InstructionStep(number: 5, text: "Confirmá la transferencia. El saldo se refleja en segundos.")
+                        }
+                        .padding()
+                        .background(Color.bondiCardLight)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: Color.bondiNavy.opacity(0.04), radius: 10, y: 4)
+
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Tu CLABE")
+                                .font(.headline)
+                                .foregroundStyle(Color.bondiNavy)
+
+                            BankingDetailRow(
+                                icon: "number.square.fill",
+                                label: "CLABE interbancaria",
+                                value: "646180157000000001",
+                                copyable: true
+                            )
+
+                            BankingDetailRow(
+                                icon: "building.columns.fill",
+                                label: "Banco receptor",
+                                value: "STP (Sistema de Transferencias y Pagos)"
+                            )
+                        }
+                        .padding()
+                        .background(Color.bondiCardLight)
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .shadow(color: Color.bondiNavy.opacity(0.04), radius: 10, y: 4)
+
+                        Text("Los depósitos via SPEI son procesados por Etherfuse y acreditados en tu cuenta Bondi en tiempo real.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.leading)
                     }
                     .padding()
-                    .background(Color.bondiCard)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Tu CLABE")
-                            .font(.headline)
-
-                        BankingDetailRow(
-                            icon: "number.square.fill",
-                            label: "CLABE interbancaria",
-                            value: "646180157000000001",
-                            copyable: true
-                        )
-
-                        BankingDetailRow(
-                            icon: "building.columns.fill",
-                            label: "Banco receptor",
-                            value: "STP (Sistema de Transferencias y Pagos)"
-                        )
-                    }
-                    .padding()
-                    .background(Color.bondiCard)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-
-                    Text("Los depósitos via SPEI son procesados por Etherfuse y acreditados en tu cuenta Bondi en tiempo real.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.leading)
                 }
-                .padding()
             }
             .navigationTitle("Depositar saldo")
             .navigationBarTitleDisplayMode(.inline)
@@ -252,7 +285,6 @@ private struct AddFundsSheet: View {
 }
 
 // MARK: - Subviews
-
 private struct BankingDetailRow: View {
     let icon: String
     let label: String
@@ -273,6 +305,7 @@ private struct BankingDetailRow: View {
                     .foregroundStyle(.secondary)
                 Text(value)
                     .font(.subheadline.bold())
+                    .foregroundStyle(Color.bondiNavy)
             }
 
             Spacer()
@@ -286,7 +319,7 @@ private struct BankingDetailRow: View {
                     }
                 } label: {
                     Image(systemName: copied ? "checkmark.circle.fill" : "doc.on.doc")
-                        .foregroundStyle(copied ? Color.bondiGreen : Color.bondiNavy)
+                        .foregroundStyle(copied ? Color.bondiGreen : Color.bondiNavy.opacity(0.5))
                         .font(.subheadline)
                 }
                 .buttonStyle(.plain)
@@ -308,6 +341,7 @@ private struct BulletItem: View {
                 .padding(.top, 1)
             Text(text)
                 .font(.subheadline)
+                .foregroundStyle(Color.bondiNavy)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -327,6 +361,7 @@ private struct InstructionStep: View {
                 .clipShape(Circle())
             Text(text)
                 .font(.subheadline)
+                .foregroundStyle(Color.bondiNavy)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }

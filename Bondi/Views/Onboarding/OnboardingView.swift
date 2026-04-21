@@ -19,18 +19,18 @@ struct OnboardingView: View {
             "chart.line.uptrend.xyaxis",
             "Tu dinero\ntrabajando para ti",
             "Rendimientos de hasta 11% anual en bonos de gobiernos latinoamericanos. Sin complicaciones."
-        ),
+        )
     ]
 
     var body: some View {
         ZStack {
-            Color.bondiNavy.ignoresSafeArea()
+            Color.bondiSoftBackground.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 HStack {
                     Spacer()
                     Button("Saltar") { onComplete() }
-                        .foregroundStyle(.white.opacity(0.7))
+                        .foregroundStyle(Color.bondiNavy.opacity(0.6))
                         .padding()
                 }
 
@@ -52,7 +52,7 @@ struct OnboardingView: View {
                 HStack(spacing: 8) {
                     ForEach(slides.indices, id: \.self) { index in
                         Circle()
-                            .fill(currentPage == index ? Color.bondiGreen : Color.white.opacity(0.4))
+                            .fill(currentPage == index ? Color.bondiGreen : Color.bondiNavy.opacity(0.2))
                             .frame(width: 8, height: 8)
                             .animation(.easeInOut, value: currentPage)
                     }
@@ -69,12 +69,26 @@ struct OnboardingView: View {
                     }
                 }) {
                     Text(currentPage < slides.count - 1 ? "Siguiente" : "Comenzar")
-                        .font(.headline)
+                        .font(.system(.headline, design: .rounded, weight: .semibold))
                         .foregroundStyle(Color.bondiNavy)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.bondiGreen)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .padding(.vertical, 18)
+                        .background(
+                            ZStack {
+                                LinearGradient(
+                                    colors: [Color.bondiGreen, Color.bondiGreenLight],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                                LinearGradient(
+                                    colors: [.white.opacity(0.45), .clear],
+                                    startPoint: .top,
+                                    endPoint: .center
+                                )
+                            }
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 48)
@@ -96,12 +110,12 @@ private struct OnboardingSlide: View {
 
             Text(title)
                 .font(.title.bold())
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.bondiNavy)
                 .multilineTextAlignment(.center)
 
             Text(subtitle)
                 .font(.body)
-                .foregroundStyle(.white.opacity(0.8))
+                .foregroundStyle(Color.bondiNavy.opacity(0.7))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
         }

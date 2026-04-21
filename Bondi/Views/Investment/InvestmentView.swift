@@ -23,11 +23,15 @@ struct InvestmentView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                switch step {
-                case .amount: amountView
-                case .review: reviewView
-                case .success: successView
+            ZStack {
+                Color.bondiSoftBackground.ignoresSafeArea()
+                
+                Group {
+                    switch step {
+                    case .amount: amountView
+                    case .review: reviewView
+                    case .success: successView
+                    }
                 }
             }
             .navigationTitle(step == .amount ? "¿Cuánto invertir?" : step == .review ? "Confirmar" : "")
@@ -36,6 +40,7 @@ struct InvestmentView: View {
                 if step != .success {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Cancelar") { dismiss() }
+                            .foregroundStyle(Color.bondiNavy)
                     }
                 }
             }
@@ -43,47 +48,50 @@ struct InvestmentView: View {
     }
 
     // MARK: Amount step
-
     private var amountView: some View {
         VStack(spacing: 24) {
             // Bond summary
             HStack {
                 Text(bond.countryFlag).font(.title2)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(bond.name).font(.headline)
+                    Text(bond.name).font(.headline).foregroundStyle(Color.bondiNavy)
                     Text("\(String(format: "%.1f", bond.yieldAnnual))% anual · \(bond.monthsToMaturity) meses")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
             }
             .padding()
-            .background(Color.bondiCard)
+            .background(Color.bondiCardLight)
             .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: Color.bondiNavy.opacity(0.03), radius: 10, y: 4)
 
             // Preset amounts
             HStack(spacing: 6) {
                 ForEach([5, 10, 25, 50, 100], id: \.self) { preset in
                     Button("$\(preset)") { amount = Double(preset) }
-                        .font(.subheadline)
+                        .font(.subheadline.weight(.semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(amount == Double(preset) ? Color.bondiNavy : Color.bondiCard)
-                        .foregroundStyle(amount == Double(preset) ? .white : .primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .background(amount == Double(preset) ? Color.bondiNavy : Color.bondiCardLight)
+                        .foregroundStyle(amount == Double(preset) ? .white : Color.bondiNavy)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: Color.bondiNavy.opacity(0.04), radius: 4, y: 2)
                 }
             }
 
             // Big amount display
             VStack(spacing: 2) {
                 Text("$\(Int(amount))")
-                    .font(.system(size: 56, weight: .bold))
+                    .font(.system(size: 56, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color.bondiNavy)
                 Text("USD")
                     .foregroundStyle(.secondary)
+                    .font(.headline)
             }
+            .padding(.vertical, 20)
 
             Slider(value: $amount, in: 5...500, step: 5)
-                .tint(Color.bondiNavy)
+                .tint(Color.bondiGreen)
 
             // Projected return
             HStack {
@@ -91,35 +99,51 @@ struct InvestmentView: View {
                     .foregroundStyle(.secondary)
                 Spacer()
                 Text("$\(expectedReturn, specifier: "%.2f")")
-                    .bold()
+                    .font(.title3.bold())
                     .foregroundStyle(Color.bondiGreen)
             }
             .padding()
-            .background(Color.bondiCard)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .background(Color.bondiCardLight)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: Color.bondiNavy.opacity(0.03), radius: 10, y: 4)
 
             Spacer()
 
-            Button("Revisar inversión") { step = .review }
-                .font(.headline)
-                .foregroundStyle(Color.bondiNavy)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.bondiGreen)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+            Button(action: { step = .review }) {
+                Text("Revisar inversión")
+                    .font(.system(.headline, design: .rounded, weight: .semibold))
+                    .foregroundStyle(Color.bondiNavy)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+                    .background(
+                        ZStack {
+                            LinearGradient(
+                                colors: [Color.bondiGreen, Color.bondiGreenLight],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            LinearGradient(
+                                colors: [.white.opacity(0.45), .clear],
+                                startPoint: .top,
+                                endPoint: .center
+                            )
+                        }
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
+            }
         }
         .padding()
     }
 
     // MARK: Review step
-
     private var reviewView: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(spacing: 16) {
                     HStack {
                         Text(bond.countryFlag).font(.title2)
-                        Text(bond.name).font(.headline)
+                        Text(bond.name).font(.headline).foregroundStyle(Color.bondiNavy)
                         Spacer()
                     }
 
@@ -128,22 +152,24 @@ struct InvestmentView: View {
                     VStack(spacing: 12) {
                         SummaryRow(label: "Monto invertido", value: "$\(String(format: "%.2f", amount))")
                         SummaryRow(label: "Fee Bondi (1%)", value: "- $\(String(format: "%.2f", fee))", isNegative: true)
-                        Divider()
+                        Divider().opacity(0.5)
                         SummaryRow(label: "Total debitado", value: "$\(String(format: "%.2f", totalDebited))", isBold: true)
                     }
                     .padding()
-                    .background(Color.bondiCard)
+                    .background(Color.bondiCardLight)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .shadow(color: Color.bondiNavy.opacity(0.03), radius: 10, y: 4)
 
                     VStack(spacing: 10) {
                         HStack {
-                            Text("Rendimiento esperado")
+                            Text("Rendimiento esperado").foregroundStyle(Color.bondiNavy)
                             Spacer()
                             Text("+ $\(String(format: "%.2f", expectedReturn - amount))")
                                 .foregroundStyle(Color.bondiGreen)
+                                .fontWeight(.semibold)
                         }
                         HStack {
-                            Text("Recibirás:").font(.headline)
+                            Text("Recibirás:").font(.headline).foregroundStyle(Color.bondiNavy)
                             Spacer()
                             Text("$\(String(format: "%.2f", expectedReturn))")
                                 .font(.headline)
@@ -156,8 +182,9 @@ struct InvestmentView: View {
                         }
                     }
                     .padding()
-                    .background(Color.bondiCard)
+                    .background(Color.bondiCardLight)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .shadow(color: Color.bondiNavy.opacity(0.03), radius: 10, y: 4)
                 }
                 .padding()
             }
@@ -167,12 +194,30 @@ struct InvestmentView: View {
                     Image(systemName: "faceid")
                     Text(isProcessing ? "Procesando..." : "Confirmar con Face ID")
                 }
-                .font(.headline)
+                .font(.system(.headline, design: .rounded, weight: .semibold))
                 .foregroundStyle(Color.bondiNavy)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(isProcessing ? Color.bondiGreen.opacity(0.5) : Color.bondiGreen)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .padding(.vertical, 18)
+                .background(
+                    ZStack {
+                        if isProcessing {
+                            Color.bondiGreen.opacity(0.5)
+                        } else {
+                            LinearGradient(
+                                colors: [Color.bondiGreen, Color.bondiGreenLight],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            LinearGradient(
+                                colors: [.white.opacity(0.45), .clear],
+                                startPoint: .top,
+                                endPoint: .center
+                            )
+                        }
+                    }
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                .shadow(color: isProcessing ? .clear : Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
             }
             .disabled(isProcessing)
             .padding()
@@ -180,7 +225,6 @@ struct InvestmentView: View {
     }
 
     // MARK: Success step
-
     private var successView: some View {
         VStack(spacing: 32) {
             Spacer()
@@ -188,10 +232,12 @@ struct InvestmentView: View {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 80))
                 .foregroundStyle(Color.bondiGreen)
+                .shadow(color: Color.bondiGreen.opacity(0.3), radius: 20, y: 10)
 
             VStack(spacing: 8) {
                 Text("¡Inversión exitosa!")
                     .font(.title.bold())
+                    .foregroundStyle(Color.bondiNavy)
                 Text("Invertiste $\(String(format: "%.2f", amount)) en \(bond.name)")
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
@@ -200,26 +246,41 @@ struct InvestmentView: View {
             VStack(spacing: 4) {
                 Text("Recibirás").foregroundStyle(.secondary)
                 Text("$\(String(format: "%.2f", expectedReturn))")
-                    .font(.system(size: 44, weight: .bold))
+                    .font(.system(size: 44, weight: .heavy, design: .rounded))
                     .foregroundStyle(Color.bondiGreen)
                 Text(bond.maturityDate, style: .date).foregroundStyle(.secondary)
             }
 
             Spacer()
 
-            Button("Ver mi portafolio") { dismiss() }
-                .font(.headline)
-                .foregroundStyle(Color.bondiNavy)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(Color.bondiGreen)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .padding()
+            Button(action: { dismiss() }) {
+                Text("Ver mi portafolio")
+                    .font(.system(.headline, design: .rounded, weight: .semibold))
+                    .foregroundStyle(Color.bondiNavy)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+                    .background(
+                        ZStack {
+                            LinearGradient(
+                                colors: [Color.bondiGreen, Color.bondiGreenLight],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            LinearGradient(
+                                colors: [.white.opacity(0.45), .clear],
+                                startPoint: .top,
+                                endPoint: .center
+                            )
+                        }
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
+            }
+            .padding()
         }
     }
 
     // MARK: Biometrics
-
     private func confirmWithBiometrics() {
         let context = LAContext()
         var error: NSError?
@@ -236,7 +297,6 @@ struct InvestmentView: View {
                 }
             }
         } else {
-            // Simulator / no biometrics fallback
             isProcessing = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 isProcessing = false
@@ -265,11 +325,13 @@ private struct SummaryRow: View {
 
     var body: some View {
         HStack {
-            Text(label).fontWeight(isBold ? .semibold : .regular)
+            Text(label)
+                .fontWeight(isBold ? .semibold : .regular)
+                .foregroundStyle(Color.bondiNavy)
             Spacer()
             Text(value)
                 .fontWeight(isBold ? .semibold : .regular)
-                .foregroundStyle(isNegative ? .secondary : .primary)
+                .foregroundStyle(isNegative ? .secondary : Color.bondiNavy)
         }
     }
 }

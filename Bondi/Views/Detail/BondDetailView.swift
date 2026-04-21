@@ -12,27 +12,48 @@ struct BondDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                bondHeader
-                statsRow
-                Divider()
-                aiExplanationSection
-                Divider()
-                simulatorSection
+        ZStack {
+            Color.bondiSoftBackground.ignoresSafeArea()
+            
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    bondHeader
+                    statsRow
+                    Divider().opacity(0.5)
+                    aiExplanationSection
+                    Divider().opacity(0.5)
+                    simulatorSection
 
-                Button(action: { showInvestmentSheet = true }) {
-                    Label("Invertir ahora", systemImage: "arrow.up.circle.fill")
-                        .font(.headline)
+                    Button(action: { showInvestmentSheet = true }) {
+                        HStack(spacing: 8) {
+                            Text("Invertir ahora")
+                                .font(.system(.headline, design: .rounded, weight: .semibold))
+                            Image(systemName: "arrow.up.circle.fill")
+                        }
                         .foregroundStyle(Color.bondiNavy)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.bondiGreen)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .padding(.vertical, 18)
+                        .background(
+                            ZStack {
+                                LinearGradient(
+                                    colors: [Color.bondiGreen, Color.bondiGreenLight],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                                LinearGradient(
+                                    colors: [.white.opacity(0.45), .clear],
+                                    startPoint: .top,
+                                    endPoint: .center
+                                )
+                            }
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .shadow(color: Color.bondiGreen.opacity(0.45), radius: 20, y: 10)
+                    }
+                    .padding(.top, 12)
                 }
-                .padding(.top, 4)
+                .padding()
             }
-            .padding()
         }
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showInvestmentSheet) {
@@ -47,7 +68,6 @@ struct BondDetailView: View {
     }
 
     // MARK: - Header
-
     private var bondHeader: some View {
         HStack(spacing: 16) {
             Text(bond.countryFlag)
@@ -55,6 +75,7 @@ struct BondDetailView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(bond.name)
                     .font(.title2.bold())
+                    .foregroundStyle(Color.bondiNavy)
                 Text(bond.country)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -64,7 +85,6 @@ struct BondDetailView: View {
     }
 
     // MARK: - Stats
-
     private var statsRow: some View {
         HStack(spacing: 12) {
             StatCard(label: "Rendimiento", value: "\(String(format: "%.1f", bond.yieldAnnual))%")
@@ -74,7 +94,6 @@ struct BondDetailView: View {
     }
 
     // MARK: - AI Explanation
-
     private var aiExplanationSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             aiSectionHeader
@@ -125,28 +144,29 @@ struct BondDetailView: View {
     }
 
     // MARK: - Simulator
-
     private var simulatorSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Simulador")
                 .font(.headline)
+                .foregroundStyle(Color.bondiNavy)
 
             HStack(spacing: 6) {
                 ForEach([5, 10, 25, 50, 100], id: \.self) { preset in
                     Button("$\(preset)") {
                         investmentAmount = Double(preset)
                     }
-                    .font(.subheadline)
+                    .font(.subheadline.weight(.semibold))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .background(investmentAmount == Double(preset) ? Color.bondiNavy : Color.bondiCard)
-                    .foregroundStyle(investmentAmount == Double(preset) ? .white : .primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.vertical, 10)
+                    .background(investmentAmount == Double(preset) ? Color.bondiNavy : Color.bondiCardLight)
+                    .foregroundStyle(investmentAmount == Double(preset) ? .white : Color.bondiNavy)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .shadow(color: Color.bondiNavy.opacity(0.04), radius: 4, y: 2)
                 }
             }
 
             Slider(value: $investmentAmount, in: 5...500, step: 5)
-                .tint(Color.bondiNavy)
+                .tint(Color.bondiGreen)
 
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
@@ -159,18 +179,18 @@ struct BondDetailView: View {
                 }
                 Spacer()
                 Text("$\(projectedReturn, specifier: "%.2f")")
-                    .font(.title3.bold())
+                    .font(.title2.bold())
                     .foregroundStyle(Color.bondiGreen)
             }
             .padding()
-            .background(Color.bondiCard)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .background(Color.bondiCardLight)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .shadow(color: Color.bondiNavy.opacity(0.03), radius: 10, y: 4)
         }
     }
 }
 
 // MARK: - Streaming Text Card
-
 private struct StreamingTextCard: View {
     let text: String
     let isStreaming: Bool
@@ -180,21 +200,21 @@ private struct StreamingTextCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Text with blinking cursor appended while streaming
             (Text(text) + cursorText)
                 .font(.callout)
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color.bondiNavy.opacity(0.85))
                 .fixedSize(horizontal: false, vertical: true)
                 .animation(.none, value: text)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.bondiNavy.opacity(0.06))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .background(Color.bondiCardLight)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(Color.bondiNavy.opacity(isStreaming ? 0.25 : 0.12), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.bondiGreen.opacity(isStreaming ? 0.4 : 0.1), lineWidth: 1)
         )
+        .shadow(color: Color.bondiNavy.opacity(0.03), radius: 10, y: 4)
         .onAppear {
             guard isStreaming else { return }
             withAnimation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true)) {
@@ -211,7 +231,6 @@ private struct StreamingTextCard: View {
 }
 
 // MARK: - Stat Card
-
 private struct StatCard: View {
     let label: String
     let value: String
@@ -227,7 +246,8 @@ private struct StatCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding(12)
-        .background(Color.bondiCard)
+        .background(Color.bondiCardLight)
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .shadow(color: Color.bondiNavy.opacity(0.03), radius: 5, y: 2)
     }
 }
