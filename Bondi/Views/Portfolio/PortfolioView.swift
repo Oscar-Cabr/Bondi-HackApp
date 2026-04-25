@@ -84,7 +84,6 @@ struct PortfolioView: View {
         .preferredColorScheme(.dark)
     }
 
-    // MARK: Empty state
     private var emptyState: some View {
         ContentUnavailableView {
             Label("Sin inversiones aún", systemImage: "chart.pie")
@@ -95,7 +94,6 @@ struct PortfolioView: View {
         }
     }
 
-    // MARK: Portfolio content
     private var portfolioContent: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -124,7 +122,6 @@ struct PortfolioView: View {
         }
     }
 
-    // MARK: Balance card
     private var balanceCard: some View {
         VStack(spacing: 8) {
             Text("Patrimonio total")
@@ -188,7 +185,6 @@ struct PortfolioView: View {
     }
 }
 
-// MARK: - Subviews
 private struct SectionHeader: View {
     let title: String
     var body: some View {

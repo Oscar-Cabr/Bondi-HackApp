@@ -1,8 +1,6 @@
 import Foundation
 
 enum AppConfig {
-    /// Clerk Publishable Key read from Info.plist (key: `ClerkPublishableKey`).
-    /// The key is safe to ship — it's public by design. Never include the Secret Key.
     static var clerkPublishableKey: String {
         guard
             let value = Bundle.main.object(forInfoDictionaryKey: "ClerkPublishableKey") as? String,

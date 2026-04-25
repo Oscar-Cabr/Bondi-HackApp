@@ -180,7 +180,6 @@ struct LandingView: View {
     }
 }
 
-// MARK: - Hero Card
 
 private struct BondHeroCard: View {
     let animatedYield: Double
@@ -287,7 +286,6 @@ private struct BondHeroCard: View {
                 }
                 .padding(22)
 
-                // Shine sweep
                 ShineOverlay(phase: shinePhase)
                     .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
                     .allowsHitTesting(false)
@@ -346,7 +344,6 @@ private struct AnimatedYieldText: View {
 }
 
 private struct Sparkline: Shape {
-    // Stylized upward-trending line
     private let points: [CGFloat] = [0.80, 0.72, 0.76, 0.62, 0.55, 0.58, 0.44, 0.36, 0.32, 0.20, 0.12]
 
     func path(in rect: CGRect) -> Path {
@@ -398,7 +395,6 @@ private struct ShineOverlay: View {
     }
 }
 
-// MARK: - Animated Background
 
 private struct AnimatedMeshBackground: View {
     var body: some View {
@@ -474,7 +470,6 @@ private struct AnimatedMeshBackground: View {
     }
 }
 
-// MARK: - Floating Coins
 
 private struct FloatingCoins: View {
     private struct Coin: Identifiable {
@@ -533,7 +528,6 @@ private struct FloatingCoins: View {
     }
 }
 
-// MARK: - Badge
 
 private struct BadgePill: View {
     let icon: String

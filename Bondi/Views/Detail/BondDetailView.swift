@@ -47,7 +47,6 @@ struct BondDetailView: View {
         }
     }
 
-    // MARK: - Header
     private var bondHeader: some View {
         Group {
             if let imageName = bond.heroImageName,
@@ -106,7 +105,6 @@ struct BondDetailView: View {
         }
     }
 
-    // MARK: - Stats
     private var statsRow: some View {
         HStack(spacing: 12) {
             StatCard(label: "Rendimiento", value: "\(String(format: "%.1f", bond.yieldAnnual))%")
@@ -115,7 +113,6 @@ struct BondDetailView: View {
         }
     }
 
-    // MARK: - AI Explanation
     private var aiExplanationSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             aiSectionHeader
@@ -218,7 +215,6 @@ struct BondDetailView: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - Simulator
     private var simulatorSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Simulador")
@@ -271,7 +267,6 @@ struct BondDetailView: View {
     }
 }
 
-// MARK: - Streaming Text Card
 private struct StreamingTextCard: View {
     let text: String
     let isStreaming: Bool
@@ -311,7 +306,6 @@ private struct StreamingTextCard: View {
     }
 }
 
-// MARK: - Stat Card
 private struct StatCard: View {
     let label: String
     let value: String

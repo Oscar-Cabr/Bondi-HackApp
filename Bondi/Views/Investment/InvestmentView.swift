@@ -48,10 +48,8 @@ struct InvestmentView: View {
         }
     }
 
-    // MARK: Amount step
     private var amountView: some View {
         VStack(spacing: 24) {
-            // Bond summary
             HStack {
                 Text(bond.countryFlag).font(.title2)
                 VStack(alignment: .leading, spacing: 2) {
@@ -122,7 +120,6 @@ struct InvestmentView: View {
         .padding()
     }
 
-    // MARK: Review step
     private var reviewView: some View {
         VStack(spacing: 0) {
             ScrollView {
@@ -193,7 +190,6 @@ struct InvestmentView: View {
         }
     }
 
-    // MARK: Success step
     private var successView: some View {
         VStack(spacing: 32) {
             Spacer()
@@ -234,7 +230,6 @@ struct InvestmentView: View {
         }
     }
 
-    // MARK: Biometrics
     private func confirmWithBiometrics() {
         let context = LAContext()
         var error: NSError?

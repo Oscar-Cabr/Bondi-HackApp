@@ -49,7 +49,6 @@ struct AccountView: View {
         .preferredColorScheme(.dark)
     }
 
-    // MARK: - Balance card
     private var balanceCard: some View {
         VStack(spacing: 8) {
             Text("Saldo disponible")
@@ -84,7 +83,6 @@ struct AccountView: View {
         .shadow(color: Color.black.opacity(0.35), radius: 18, y: 8)
     }
 
-    // MARK: - Add funds button
     private var addFundsButton: some View {
         Button("Depositar saldo") {
             showAddFunds = true
@@ -92,7 +90,6 @@ struct AccountView: View {
         .buttonStyle(BondiPrimaryButtonStyle(icon: "plus.circle.fill"))
     }
 
-    // MARK: - Banking details section
     private var bankingDetailsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Datos bancarios")
@@ -146,7 +143,6 @@ struct AccountView: View {
         .shadow(color: Color.bondiNavy.opacity(0.04), radius: 10, y: 4)
     }
 
-    // MARK: - Powered by section
     private var poweredBySection: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 8) {
@@ -192,7 +188,6 @@ struct AccountView: View {
     }
 }
 
-// MARK: - Add Funds Sheet
 private struct AddFundsSheet: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -267,7 +262,6 @@ private struct AddFundsSheet: View {
     }
 }
 
-// MARK: - Subviews
 private struct BankingDetailRow: View {
     let icon: String
     let label: String

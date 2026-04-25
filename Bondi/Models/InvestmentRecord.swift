@@ -1,15 +1,11 @@
 import Foundation
 import SwiftData
 
-/// Persisted investment. Stores a snapshot of the bond's terms at the time of
-/// purchase — correct behaviour for financial instruments (terms don't change
-/// retroactively even if the live catalogue updates).
 @Model
 final class InvestmentRecord {
     var id: UUID
     var investedAt: Date
 
-    // Bond snapshot
     var bondId: String
     var bondName: String
     var bondCountry: String
@@ -18,7 +14,6 @@ final class InvestmentRecord {
     var bondMaturityDate: Date
     var bondRiskLevel: String
 
-    // Transaction
     var amountUSD: Double
     var feeUSD: Double
 
@@ -42,7 +37,6 @@ final class InvestmentRecord {
         self.feeUSD = feeUSD
     }
 
-    // MARK: Computed
 
     var currentValueUSD: Double {
         let elapsed = Calendar.current.dateComponents([.day], from: investedAt, to: .now).day ?? 0

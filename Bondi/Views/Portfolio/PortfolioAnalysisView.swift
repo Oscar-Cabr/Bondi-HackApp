@@ -38,7 +38,6 @@ struct PortfolioAnalysisView: View {
         }
     }
 
-    // MARK: - Header badge
     private var intelligenceBadge: some View {
         HStack(spacing: 5) {
             Image(systemName: "apple.intelligence")
@@ -59,7 +58,6 @@ struct PortfolioAnalysisView: View {
         )
     }
 
-    // MARK: - Message list
     private var messageList: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -95,7 +93,6 @@ struct PortfolioAnalysisView: View {
         }
     }
 
-    // MARK: - Suggestion chips
     @ViewBuilder
     private var suggestionChips: some View {
         let suggestions = service.suggestedPrompts
@@ -132,7 +129,6 @@ struct PortfolioAnalysisView: View {
         }
     }
 
-    // MARK: - Input bar
     private var inputBar: some View {
         HStack(spacing: 10) {
             TextField("Preguntá sobre tu portafolio…", text: $service.inputText, axis: .vertical)
@@ -174,7 +170,6 @@ struct PortfolioAnalysisView: View {
     }
 }
 
-// MARK: - Message Bubble
 private struct MessageBubble: View {
     let message: PortfolioAnalysisService.ChatMessage
 
@@ -251,7 +246,6 @@ private struct MessageBubble: View {
     }
 }
 
-// MARK: - Typing Indicator
 private struct TypingIndicator: View {
     @State private var animating = false
 

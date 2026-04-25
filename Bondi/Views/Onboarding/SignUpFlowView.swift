@@ -1,11 +1,6 @@
 import ClerkKitUI
 import SwiftUI
 
-/// Flow for creating a new account:
-/// 1. Educational onboarding (3 slides) — only the first time on the device.
-/// 2. Clerk's `AuthView` in sign-in-or-up mode (Clerk auto-detects based on email).
-///
-/// Presented as a sheet from `LandingView`'s "Crear mi cuenta" CTA.
 struct SignUpFlowView: View {
     let showOnboarding: Bool
     let onOnboardingComplete: () -> Void

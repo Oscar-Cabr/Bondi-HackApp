@@ -6,7 +6,6 @@ import Observation
 @MainActor
 final class PortfolioAnalysisService {
 
-    // MARK: Chat message
 
     struct ChatMessage: Identifiable {
         let id = UUID()
@@ -16,7 +15,6 @@ final class PortfolioAnalysisService {
         var isStreaming: Bool = false
     }
 
-    // MARK: State
 
     private(set) var messages: [ChatMessage] = []
     private(set) var isLoading = false
@@ -26,7 +24,6 @@ final class PortfolioAnalysisService {
     private var cashBalanceUSD: Double = 0
     private var fallbackRotation = 0
 
-    // Stored as Any? because LanguageModelSession is iOS 26+ only.
     private var _session: Any?
 
     @available(iOS 26.0, *)
@@ -35,7 +32,6 @@ final class PortfolioAnalysisService {
         set { _session = newValue }
     }
 
-    // MARK: Availability
 
     private static var isAvailable: Bool {
         if #available(iOS 26.0, *) {
@@ -44,11 +40,7 @@ final class PortfolioAnalysisService {
         return false
     }
 
-    // MARK: Start
 
-    /// Opens the chat with a deterministic, structured breakdown of the user's
-    /// portfolio. The AI session is still started so follow-up questions use it
-    /// when available.
     func start(investments: [InvestmentRecord], cashBalanceUSD: Double) async {
         guard messages.isEmpty else { return }
         investmentsSnapshot = investments
@@ -58,11 +50,9 @@ final class PortfolioAnalysisService {
             session = makeSession()
         }
 
-        // Always show the structured breakdown first — guaranteed, deterministic.
         await appendAnimated(portfolioBreakdown())
     }
 
-    // MARK: Send user message
 
     func sendMessage() async {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -71,7 +61,6 @@ final class PortfolioAnalysisService {
         await submit(text: text)
     }
 
-    /// Send an arbitrary user text (used by suggestion chips in the UI).
     func submit(text: String) async {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !isLoading else { return }
@@ -80,14 +69,12 @@ final class PortfolioAnalysisService {
         if Self.isAvailable, #available(iOS 26.0, *) {
             await sendPrompt(trimmed)
         } else {
-            // No AI → smart fallback that answers any input
             let idx = appendStreamingPlaceholder()
             isLoading = true
             await animateContent(into: idx, text: dataBackedFallback(for: trimmed))
         }
     }
 
-    // MARK: Core streaming
 
     @available(iOS 26.0, *)
     private func makeSession() -> LanguageModelSession {
@@ -109,14 +96,11 @@ final class PortfolioAnalysisService {
                 return
 
             case .assetsMissing:
-                // Safety/language model assets not available on this device.
-                // Retrying won't help — fall back directly with a real data-backed reply.
                 messages[idx].isStreaming = false
                 await animateContent(into: idx, text: dataBackedFallback(for: prompt))
                 return
 
             case .other:
-                // Possibly poisoned session → retry once with fresh session.
                 session = makeSession()
                 let retry = await attemptStream(prompt: prompt, into: idx)
                 if case .success = retry {
@@ -134,8 +118,8 @@ final class PortfolioAnalysisService {
 
     enum StreamResult {
         case success
-        case assetsMissing      // Apple Intelligence assets not downloaded / catalog error
-        case other              // Generic error — may be transient
+        case assetsMissing
+        case other
     }
 
     @available(iOS 26.0, *)
@@ -181,7 +165,6 @@ final class PortfolioAnalysisService {
         print("╰───────────────────────────────────────────────")
     }
 
-    // MARK: Portfolio breakdown (shown on open — always deterministic)
 
     private func portfolioBreakdown() -> String {
         let invs = investmentsSnapshot
@@ -241,7 +224,6 @@ final class PortfolioAnalysisService {
         return lines.joined(separator: "\n")
     }
 
-    // MARK: Data-backed fallback (no AI required, uses the actual portfolio)
 
     private func dataBackedFallback(for prompt: String) -> String {
         let lowered = prompt
@@ -249,7 +231,6 @@ final class PortfolioAnalysisService {
             .folding(options: .diacriticInsensitive, locale: .current)
         let investments = investmentsSnapshot
 
-        // ─── 1. Social / meta intents ────────────────────────────
         if matches(lowered, any: [
             "hola", "holis", "buenas", "hey", "que tal", "que hay",
             "buen dia", "buenos dias", "buenas tardes", "buenas noches"
@@ -289,7 +270,6 @@ final class PortfolioAnalysisService {
             return "Soy el asistente de Bondi. Estoy acá para ayudarte a entender tus inversiones en bonos soberanos."
         }
 
-        // ─── 2. Educational (no portfolio data needed) ───────────
         if matches(lowered, any: [
             "que es un bono", "que son los bonos", "explicame los bonos",
             "explica bonos", "definicion de bono", "que significa bono"
@@ -373,7 +353,6 @@ final class PortfolioAnalysisService {
         }
 
         if matches(lowered, any: ["compara", "comparar", "diferencia entre", "cual es mejor entre"]) {
-            // Try to detect two bond mentions in the portfolio.
             let mentioned = investments.filter { investmentMentioned($0, in: lowered) }
             if mentioned.count >= 2 {
                 let a = mentioned[0]
@@ -387,7 +366,6 @@ final class PortfolioAnalysisService {
             return "Para comprar un bono: andá al Catálogo, tocá el bono que te interese, ingresá el monto en dólares y confirmá con Face ID. La inversión queda registrada al instante y aparece en tu portafolio."
         }
 
-        // ─── 3. Portfolio data required ──────────────────────────
         guard !investments.isEmpty else {
             return "Todavía no tenés inversiones. Cuando hagas la primera voy a poder ayudarte a entenderla. Mientras tanto podés preguntarme cómo funcionan los bonos."
         }
@@ -403,7 +381,6 @@ final class PortfolioAnalysisService {
         let biggest = investments.max(by: { $0.amountUSD < $1.amountUSD })
         let avgYield = investments.map(\.bondYieldAnnual).reduce(0, +) / Double(investments.count)
 
-        // Specific bond name mentioned → describe that bond in detail
         if let bond = investments.first(where: { investmentMentioned($0, in: lowered) }) {
             let sign = bond.returnUSD >= 0 ? "+" : ""
             return """
@@ -416,7 +393,6 @@ final class PortfolioAnalysisService {
             """
         }
 
-        // Specific country mentioned → describe that country's investments
         for country in countries {
             let normalized = country
                 .lowercased()
@@ -519,7 +495,6 @@ final class PortfolioAnalysisService {
             return "Para sumar más inversiones, andá al catálogo y elegí el bono que te interese. Podés empezar desde montos chicos y diversificar entre países."
         }
 
-        // ─── 4. Unknown question → rotating summary ──────────────
         return rotatingSummary(
             investments: investments,
             total: total,
@@ -572,8 +547,6 @@ final class PortfolioAnalysisService {
         keywords.contains { text.contains($0) }
     }
 
-    /// Returns true if the user text mentions this specific investment by bond name.
-    /// Uses name tokens of length >= 3 that aren't generic words.
     private func investmentMentioned(_ inv: InvestmentRecord, in normalizedText: String) -> Bool {
         let stopwords: Set<String> = [
             "bono", "bonos", "del", "los", "las", "para", "por", "con"
@@ -581,19 +554,14 @@ final class PortfolioAnalysisService {
         let name = inv.bondName
             .lowercased()
             .folding(options: .diacriticInsensitive, locale: .current)
-        // Full name match
         if normalizedText.contains(name) { return true }
-        // Distinctive token match (e.g. "cetes", "ntn", "tes")
         let tokens = name
             .components(separatedBy: CharacterSet.alphanumerics.inverted)
             .filter { $0.count >= 3 && !stopwords.contains($0) }
         return tokens.contains { normalizedText.contains($0) }
     }
 
-    // MARK: Suggested prompts (surfaced in the UI)
 
-    /// Quick-reply suggestions shown as tappable chips above the input bar.
-    /// Adapts based on whether the user has investments.
     var suggestedPrompts: [String] {
         if investmentsSnapshot.isEmpty {
             return [
@@ -612,7 +580,6 @@ final class PortfolioAnalysisService {
             "¿Cuánto tengo disponible?",
             "¿Qué harías?"
         ]
-        // Country-specific prompt if user has multiple countries
         let countries = Array(Set(investmentsSnapshot.map(\.bondCountry)))
         if let country = countries.first, countries.count > 1 {
             prompts.append("¿Cuánto tengo en \(country)?")
@@ -624,7 +591,6 @@ final class PortfolioAnalysisService {
         String(format: "%.2f", value)
     }
 
-    // MARK: Animated text
 
     private func appendAnimated(_ text: String) async {
         let idx = appendStreamingPlaceholder()
@@ -648,7 +614,6 @@ final class PortfolioAnalysisService {
         return messages.count - 1
     }
 
-    // MARK: Prompts — NEUTRAL framing (no financial terms in context)
 
     private func systemInstructions() -> String {
         """

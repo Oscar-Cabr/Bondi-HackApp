@@ -1,27 +1,21 @@
 import SwiftUI
 
 extension Color {
-    // MARK: - Dark Theme Overrides (Hijacking previous variables)
     
-    // Originally a dark navy, this is now your "almost white green" for text
     static let bondiNavy = Color(hex: "ECFDF5")
     
-    // Originally white/light, these are now your dark green boxes
     static let bondiCardLight = Color(hex: "064E3B")
     static let bondiCard = Color(hex: "064E3B")
     
-    // Originally soft green, now a deep, almost-black green for the app root background
     static let bondiSoftBackground = Color(hex: "022C22")
     static let bondiSoftBackgroundDarker = Color(hex: "022C22")
     
-    // MARK: - Accent Colors (Kept bright for contrast on dark backgrounds)
     static let bondiGreen = Color(hex: "4ADE80")
     static let bondiGreenLight = Color(hex: "86EFAC")
     static let bondiAmber = Color(hex: "F59E0B")
     static let bondiRed = Color(hex: "EF4444")
     static let bondiBlueLight = Color(hex: "3B82F6")
     
-    // MARK: - Landing Page Mesh & Hero Card (Shifted to deep greens)
     static let bondiCardDark = Color(hex: "022C22")
     static let bondiCardMedium = Color(hex: "064E3B")
     static let bondiMeshBase = Color(hex: "022C22")
@@ -30,10 +24,6 @@ extension Color {
     static let bondiMeshDark3 = Color(hex: "065F46")
 }
 
-// MARK: - Typography
-// Serif (New York) for display/titles → character editorial y financiero.
-// Rounded (SF Rounded) para UI/cuerpo → moderno y amigable.
-// Monospaced para números → alineación precisa en datos.
 extension Font {
     static let bondiLargeTitle = Font.system(.largeTitle, design: .serif).weight(.bold)
     static let bondiTitle = Font.system(.title, design: .serif).weight(.bold)
@@ -53,11 +43,6 @@ extension Font {
     static let bondiNumericSmall = Font.system(.headline, design: .serif).weight(.semibold)
 }
 
-// MARK: - Button Styles
-// Botones acordes al theme oscuro: sin overlays blancos brillantes.
-// Primario: verde vibrante con texto en verde profundo (alto contraste sobre fondo dark).
-// Secundario: superficie de tarjeta con borde verde sutil.
-// Chip: pill compacta para filtros/presets.
 
 struct BondiPrimaryButtonStyle: ButtonStyle {
     var icon: String? = nil

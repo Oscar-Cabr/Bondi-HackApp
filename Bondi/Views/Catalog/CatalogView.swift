@@ -28,7 +28,6 @@ struct CatalogView: View {
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        // Country filter
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
                                 FilterChip(label: "Todos", isSelected: selectedCountry == nil) {
@@ -43,7 +42,6 @@ struct CatalogView: View {
                             .padding(.horizontal)
                         }
 
-                        // Risk filter
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
                                 FilterChip(label: "Todo riesgo", isSelected: selectedRisk == nil) {
